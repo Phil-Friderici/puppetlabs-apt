@@ -4,7 +4,7 @@ sudo: false
 language: ruby
 cache: bundler
 bundler_args: --without system_tests
-script: "bundle exec rake validate lint spec"
+script: "bundle exec rake validate spec"
 matrix:
   fast_finish: true
   include:
@@ -16,5 +16,9 @@ matrix:
     env: PUPPET_GEM_VERSION="~> 3.0"
   - rvm: 1.9.3
     env: PUPPET_GEM_VERSION="~> 3.0"
+  - rvm: 2.4.1
+    env: PUPPET_GEM_VERSION="~> 5.0"
+  - rvm: 2.5.1
+    env: PUPPET_GEM_VERSION="~> 6.0"
 notifications:
   email: false
