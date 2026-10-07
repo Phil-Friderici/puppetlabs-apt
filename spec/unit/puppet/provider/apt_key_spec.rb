@@ -81,6 +81,12 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
       expect(described_class.instances[1].id).to eq('46181433FBB75451')
       expect(described_class.instances[1].expired).to be_falsey
     end
+
+    it 'ignores public keys without fingerprints' do
+      allow(described_class).to receive(:apt_key).and_return("pub:-:1024:17:40976EAF437D05B5:1095016255:::-:::scESC:\n")
+
+      expect(described_class.instances).to be_empty
+    end
   end
 
   context 'with self.instances expired subkeys' do
@@ -330,6 +336,12 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
         expect(uri).to receive(:open).with(http_basic_authentication: ['user', 'password'])
         expect(provider.source_to_file(source)).to equal(key_file)
         expect(uri.userinfo).to be_nil
+      end
+
+      it 'retains certificate verification with credentials even when weak_ssl is set' do
+        resource[:weak_ssl] = true
+        expect(uri).to receive(:open).with(http_basic_authentication: ['user', 'password'])
+        expect(provider.source_to_file(source)).to equal(key_file)
       end
     end
 
