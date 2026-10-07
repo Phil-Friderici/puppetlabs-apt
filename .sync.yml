@@ -1,8 +1,4 @@
 ---
-".gitlab-ci.yml":
-  delete: true
-appveyor.yml:
-  delete: true
 .rubocop.yml:
   include_todos: true
 Rakefile:
@@ -32,11 +28,3 @@ spec/spec_helper.rb:
     - '--collection-platform-exclude 9:ubuntu-20.04'
 .github/workflows/release.yml:
   unmanaged: false
-.travis.yml:
-  delete: true
-Gemfile:
-  overrides:
-    - gem: 'puppetlabs_spec_helper'
-      version: '~> 9.0'
-    - gem: 'puppet_litmus'
-      version: '~> 2.8'

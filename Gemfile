@@ -88,12 +88,12 @@ group :development do
 end
 group :development, :release_prep do
   gem "puppet-strings", '>= 4.0', '< 6.0',     require: false
-  gem "puppetlabs_spec_helper", '~> 9.0',      require: false
-  gem "puppetlabs_spec_helper", '~> 9.0',      require: false
+  gem "puppetlabs_spec_helper", '~> 9.0',      require: false if gemsource_puppetcore != "https://rubygems.org"
+  gem "puppetlabs_spec_helper", '~> 8.0',      require: false if gemsource_puppetcore == "https://rubygems.org"
   gem "puppet-blacksmith", '>= 7.0', '< 10.0', require: false
 end
 group :system_tests do
-  gem "puppet_litmus", '~> 2.8',   require: false
+  gem "puppet_litmus", '~> 2.5',   require: false
   gem "faraday", '~> 2.5',         require: false
   gem "CFPropertyList", '< 3.0.7', require: false if RUBY_PLATFORM.include?('darwin')
   gem "serverspec", '~> 2.41',     require: false
