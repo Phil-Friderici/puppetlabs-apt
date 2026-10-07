@@ -29,5 +29,17 @@ describe 'apt_package_updates fact' do
     end
 
     it { is_expected.to eq(['tzdata', 'unhide.rb']) }
+
+    context 'with mixed regular and security updates' do
+      before(:each) do
+        apt_output = "Inst curl [1] (2 Debian-Security:stable [amd64])\n" \
+                     "Inst tzdata [1] (2 Debian:stable-updates [all])\n" \
+                     "Conf curl (2 Debian-Security:stable [amd64])\n" \
+                     "Inst openssl [1] (2 Debian-Security:stable [amd64])\n"
+        allow(Facter::Core::Execution).to receive(:execute).with('/usr/bin/apt-get -s -o Debug::NoLocking=true upgrade 2>&1').and_return(apt_output)
+      end
+
+      it { is_expected.to eq(['curl', 'tzdata', 'openssl']) }
+    end
   end
 end

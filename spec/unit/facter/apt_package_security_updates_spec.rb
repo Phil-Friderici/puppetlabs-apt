@@ -49,5 +49,16 @@ describe 'apt_package_security_updates fact' do
 
       it { is_expected.to eq(['tzdata', 'curl']) }
     end
+
+    describe 'on gNewSense' do
+      let(:apt_get_upgrade_output) do
+        "Inst curl [1] (2 gNewSense:4/ucclia-security, gNewSense:4/ucclia-updates [amd64])\n" \
+          "Inst tzdata [1] (2 gNewSense:4/ucclia-updates [all])\n" \
+          "Conf curl (2 gNewSense:4/ucclia-security [amd64])\n" \
+          "Inst openssl [1] (2 gNewSense:4/ucclia-security [amd64])\n"
+      end
+
+      it { is_expected.to eq(['curl', 'openssl']) }
+    end
   end
 end
