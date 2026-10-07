@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'weakref'
 
 describe Puppet::Type.type(:apt_key).provider(:apt_key) do
   describe 'instances' do
@@ -107,6 +108,22 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
   end
 
   context 'with create apt_key resource' do
+    it 'keeps the downloaded file alive while importing the key' do
+      resource = Puppet::Type::Apt_key.new(name: 'EF8D349F', source: 'https://example.com/key.gpg')
+      provider = described_class.new(resource)
+      file_reference = nil
+      allow(provider).to receive(:source_to_file) do
+        file_reference = WeakRef.new(Struct.new(:path).new('/key.gpg'))
+        file_reference.__getobj__
+      end
+      expect(described_class).to receive(:apt_key).with(['add', '/key.gpg']) do
+        GC.start
+        expect(file_reference).to be_weakref_alive
+      end
+
+      provider.create
+    end
+
     it 'apt_key with content set and source nil' do
       expect(described_class).to receive(:apt_key).with(['adv', '--no-tty',
                                                          '--keyserver',
@@ -307,7 +324,7 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
     end
 
     context 'with basic authentication' do
-      let(:source) { URI::HTTP.build(host: 'example.com', path: '/key.gpg', userinfo: ['user', 'password'].join(':')).to_s }
+      let(:source) { URI::HTTPS.build(host: 'example.com', path: '/key.gpg', userinfo: ['user', 'password'].join(':')).to_s }
 
       it 'passes credentials separately from the URI' do
         expect(uri).to receive(:open).with(http_basic_authentication: ['user', 'password'])
