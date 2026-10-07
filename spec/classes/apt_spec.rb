@@ -451,57 +451,47 @@ describe 'apt' do
       },
     }
 
+    manage_auth_conf_values = [true, false]
     facts_hash.each do |os, facts|
-      context "when on #{os}" do
-        let(:facts) do
-          facts
-        end
-        let(:params) do
-          {
-            auth_conf_entries: [
-              {
-                machine: 'deb.example.net',
-                login: 'foologin',
-                password: 'secret',
-              },
-              {
-                machine: 'apt.example.com',
-                login: 'aptlogin',
-                password: 'supersecret',
-              },
-            ],
-          }
-        end
-
-        context 'with manage_auth_conf => true' do
+      manage_auth_conf_values.each do |manage_auth_conf|
+        context "on #{os} with manage_auth_conf => #{manage_auth_conf}" do
+          let(:facts) do
+            facts
+          end
           let(:params) do
-            super().merge(manage_auth_conf: true)
+            {
+              manage_auth_conf: manage_auth_conf,
+              auth_conf_entries: [
+                {
+                  machine: 'deb.example.net',
+                  login: 'foologin',
+                  password: 'secret',
+                },
+                {
+                  machine: 'apt.example.com',
+                  login: 'aptlogin',
+                  password: 'supersecret',
+                },
+              ],
+            }
           end
 
-          auth_conf_content = <<~CONTENT
-            // This file is managed by Puppet. DO NOT EDIT.
-            machine deb.example.net login foologin password secret
-            machine apt.example.com login aptlogin password supersecret
-          CONTENT
+          if manage_auth_conf
+            auth_conf_content = <<~CONTENT
+              // This file is managed by Puppet. DO NOT EDIT.
+              machine deb.example.net login foologin password secret
+              machine apt.example.com login aptlogin password supersecret
+            CONTENT
 
-          it {
-            expect(subject).to contain_file('/etc/apt/auth.conf').with(ensure: 'present',
-                                                                       owner: '_apt',
-                                                                       group: 'root',
-                                                                       mode: '0600',
-                                                                       notify: 'Class[Apt::Update]',
-                                                                       content: sensitive(auth_conf_content))
-          }
-        end
-
-        context 'with manage_auth_conf => false' do
-          let(:params) do
-            super().merge(manage_auth_conf: false)
+            it {
+              expect(subject).to contain_file('/etc/apt/auth.conf').with(
+                ensure: 'present', owner: '_apt', group: 'root', mode: '0600',
+                notify: 'Class[Apt::Update]', content: sensitive(auth_conf_content)
+              )
+            }
+          else
+            it { is_expected.not_to contain_file('/etc/apt/auth.conf') }
           end
-
-          it {
-            expect(subject).not_to contain_file('/etc/apt/auth.conf')
-          }
         end
       end
 

@@ -7,25 +7,21 @@ apt_dist_updates = nil
 # @param
 #   upgrade_option Type of upgrade passed into apt-get command arguments i.e. 'upgrade' or 'dist-upgrade'
 def get_updates(upgrade_option)
-  apt_updates = nil
-  if File.executable?('/usr/bin/apt-get')
-    apt_get_result = Facter::Core::Execution.execute("/usr/bin/apt-get -s -o Debug::NoLocking=true #{upgrade_option} 2>&1")
-    unless apt_get_result.nil?
-      apt_updates = [[], []]
-      apt_get_result.each_line do |line|
-        next unless %r{^Inst\s}.match?(line)
+  return unless File.executable?('/usr/bin/apt-get')
 
-        package = line.gsub(%r{^Inst\s([^\s]+)\s.*}, '\1').strip
-        apt_updates[0].push(package)
-        security_matches = [
-          %r{ Debian-Security:},
-          %r{ Ubuntu[^\s]+-security[, ]},
-          %r{ gNewSense[^\s]+-security[, ]},
-        ]
-        re = Regexp.union(security_matches)
-        apt_updates[1].push(package) if line.match(re)
-      end
-    end
+  apt_get_result = Facter::Core::Execution.execute("/usr/bin/apt-get -s -o Debug::NoLocking=true #{upgrade_option} 2>&1")
+  parse_apt_updates(apt_get_result) unless apt_get_result.nil?
+end
+
+def parse_apt_updates(apt_get_result)
+  apt_updates = [[], []]
+  security_pattern = Regexp.union([%r{ Debian-Security:}, %r{ Ubuntu[^\s]+-security[, ]}, %r{ gNewSense[^\s]+-security[, ]}])
+  apt_get_result.each_line do |line|
+    next unless %r{^Inst\s}.match?(line)
+
+    package = line.gsub(%r{^Inst\s([^\s]+)\s.*}, '\1').strip
+    apt_updates[0].push(package)
+    apt_updates[1].push(package) if line.match(security_pattern)
   end
   apt_updates
 end

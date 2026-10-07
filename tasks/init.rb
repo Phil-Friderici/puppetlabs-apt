@@ -7,13 +7,9 @@ require 'puppet'
 
 def apt_get(action)
   cmd = ['apt-get', action]
-  cmd << '-y' if ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
   if ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
     ENV['DEBIAN_FRONTEND'] = 'noninteractive'
-    cmd << '-o'
-    cmd << 'Dpkg::Options="--force-confdef"'
-    cmd << '-o'
-    cmd << 'Dpkg::Options="--force-confold"'
+    cmd.push('-y', '-o', 'Dpkg::Options="--force-confdef"', '-o', 'Dpkg::Options="--force-confold"')
   end
   stdout, stderr, status = Open3.capture3(*cmd)
   raise Puppet::Error, stderr if status != 0

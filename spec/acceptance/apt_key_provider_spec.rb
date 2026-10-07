@@ -666,18 +666,18 @@ describe 'apt_key' do
             }
     MANIFEST
 
-    it 'add an apt_key resource' do
+    it 'add an apt_key resource' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice checks exit status and idempotency.
       apply_manifest_twice(ensure_present_pp)
     end
 
-    it 'remove the apt_key resource' do
+    it 'remove the apt_key resource' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice checks exit status and idempotency.
       apply_manifest_twice(ensure_absent_pp)
     end
   end
 
   describe 'content =>' do
     context 'with puppetlabs gpg key' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest and run_shell check exit status.
         # Apply the manifest (Retry if timeout error is received from key pool)
         retry_on_error_matching do
           apply_manifest(gpg_key_pp, catch_failures: true)
@@ -689,7 +689,7 @@ describe 'apt_key' do
     end
 
     context 'with multiple keys' do
-      it 'runs without errors' do
+      it 'runs without errors' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(multiple_keys_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
@@ -706,7 +706,7 @@ describe 'apt_key' do
 
   describe 'server =>' do
     context 'with hkp://pgp.mit.edu:80' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest and run_shell check exit status.
         retry_on_error_matching do
           apply_manifest(hkp_pool_pp, catch_failures: true)
         end
@@ -718,7 +718,7 @@ describe 'apt_key' do
 
     if hkps_protocol_supported
       context 'with hkps://keyserver.ubuntu.com' do
-        it 'applies without error' do
+        it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest and run_shell check exit status.
           retry_on_error_matching do
             apply_manifest(hkps_ubuntu_pp, catch_failures: true)
           end
@@ -748,12 +748,12 @@ describe 'apt_key' do
 
   describe 'source =>' do
     context 'with http://' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(http_works_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
 
-      it 'works with userinfo' do
+      it 'works with userinfo' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(http_works_userinfo_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
@@ -777,7 +777,7 @@ describe 'apt_key' do
         run_shell("apt-key del #{CENTOS_GPG_KEY_LONG_ID}", expect_failures: true)
       end
 
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(ftp_works_pp)
         run_shell(CENTOS_KEY_CHECK_COMMAND)
       end
@@ -796,17 +796,17 @@ describe 'apt_key' do
     end
 
     context 'with https://' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(https_works_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
 
-      it 'works with weak ssl' do
+      it 'works with weak ssl' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(https_with_weak_ssl_works_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
 
-      it 'works with userinfo' do
+      it 'works with userinfo' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(https_userinfo_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
@@ -834,7 +834,7 @@ describe 'apt_key' do
         run_shell('rm /tmp/puppetlabs-pubkey.gpg')
       end
 
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(path_exists_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
@@ -867,7 +867,7 @@ describe 'apt_key' do
 
   describe 'options =>' do
     context 'with debug' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice and run_shell check exit status.
         apply_manifest_twice(debug_works_pp)
         run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
       end
@@ -876,7 +876,7 @@ describe 'apt_key' do
 
   describe 'fingerprint validation against source/content' do
     context 'with fingerprint in id matches fingerprint from remote key' do
-      it 'applies without error' do
+      it 'applies without error' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest_twice checks exit status and idempotency.
         apply_manifest_twice(fingerprint_match_pp)
       end
     end
@@ -901,7 +901,7 @@ describe 'apt_key' do
     end
 
     context 'when refresh => true' do
-      it 'updates an expired key' do
+      it 'updates an expired key' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest and run_shell check exit status.
         retry_on_error_matching do
           apply_manifest(refresh_true_pp)
           # Check key has been updated to new version
@@ -911,7 +911,7 @@ describe 'apt_key' do
     end
 
     context 'when refresh => false' do
-      it 'does not replace an expired key' do
+      it 'does not replace an expired key' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks the expected failure.
         apply_manifest(refresh_false_pp)
         # Expired key is present and has not been updated by the new version
         run_shell(PUPPETLABS_EXP_CHECK_COMMAND.to_s, expect_failures: true)

@@ -3,7 +3,8 @@
 require 'pathname'
 require 'puppet/parameter/boolean'
 
-Puppet::Type.newtype(:apt_key) do
+# Puppet registers the type and its parameters/properties in this DSL block.
+Puppet::Type.newtype(:apt_key) do # rubocop:disable Metrics/BlockLength
   @doc = <<-MANIFEST
     @summary This type provides Puppet with the capabilities to manage GPG keys needed
       by apt to perform package validation. Apt has it's own GPG keyring that can

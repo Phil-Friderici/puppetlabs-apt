@@ -166,8 +166,7 @@ describe Puppet::Type.type(:apt_key) do
       expect {
         Puppet::Type.type(:apt_key).new(id: 'EF8D349F',
                                         source: 'http://apt.puppetlabs.com/pubkey.gpg',
-                                        ensure: :absent,
-                                        refresh: true)
+                                        ensure: :absent, refresh: true)
       }.to raise_error(%r{ensure => absent and refresh => true are mutually exclusive})
     end
 

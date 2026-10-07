@@ -10,13 +10,13 @@ describe 'apt::backports' do
       MANIFEST
     end
 
-    it 'applies idempotently' do
+    it 'applies idempotently' do # rubocop:disable RSpec/NoExpectationExample -- idempotent_apply checks for changes.
       retry_on_error_matching do
         idempotent_apply(pp)
       end
     end
 
-    it 'provides backports apt sources' do
+    it 'provides backports apt sources' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks exit status.
       run_shell('apt-cache policy | grep --quiet backports')
     end
   end

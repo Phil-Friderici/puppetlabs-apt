@@ -36,24 +36,22 @@ describe 'apt::source' do
       it {
         expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main\n})
       }
+    end
 
-      context 'with repos' do
-        context 'as empty array' do
-          let(:params) { super().merge(repos: []) }
+    context 'with location and repos as empty array' do
+      let(:params) { { location: 'hello.there', repos: [] } }
 
-          it {
-            expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy\n})
-          }
-        end
+      it {
+        expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy\n})
+      }
+    end
 
-        context 'as non-empty array' do
-          let(:params) { super().merge(repos: ['main', 'non-free', 'contrib']) }
+    context 'with location and repos as non-empty array' do
+      let(:params) { { location: 'hello.there', repos: ['main', 'non-free', 'contrib'] } }
 
-          it {
-            expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main non-free contrib\n})
-          }
-        end
-      end
+      it {
+        expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main non-free contrib\n})
+      }
     end
   end
 
@@ -145,14 +143,7 @@ describe 'apt::source' do
                                                                                                                 origin: 'debian.mirror.iweb.ca')
       }
 
-      it {
-        expect(subject).to contain_apt__key("Add key: #{id} from Apt::Source my_source").that_comes_before('Apt::Setting[list-my_source]').with(ensure: 'refreshed',
-                                                                                                                                                id: id,
-                                                                                                                                                server: 'pgp.mit.edu',
-                                                                                                                                                content: 'GPG key content',
-                                                                                                                                                source: 'http://apt.puppetlabs.com/pubkey.gpg',
-                                                                                                                                                weak_ssl: true)
-      }
+      it { is_expected.to contain_apt__key("Add key: #{id} from Apt::Source my_source").that_comes_before('Apt::Setting[list-my_source]').with(params[:key]) }
     end
   end
 
@@ -442,7 +433,7 @@ describe 'apt::source' do
       }
     end
 
-    context 'suite contains a slash but does not end with slash (should require Components)' do
+    context 'when suite contains a slash but does not end with slash (should require Components)' do
       let :params do
         super().merge(
           {
@@ -458,7 +449,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_content(%r{Components: main}) }
     end
 
-    context 'suite ends with slash (should omit Components)' do
+    context 'when suite ends with slash (should omit Components)' do
       let :params do
         super().merge(
           {
@@ -474,7 +465,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").without_content(%r{Components:}) }
     end
 
-    context 'multiple suites, all end with slash (should omit Components)' do
+    context 'with multiple suites, all end with slash (should omit Components)' do
       let :params do
         super().merge(
           {
@@ -490,7 +481,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").without_content(%r{Components:}) }
     end
 
-    context 'multiple suites, not all end with slash (should raise error)' do
+    context 'with multiple suites, not all end with slash (should raise error)' do
       let :params do
         super().merge(
           {
@@ -505,7 +496,7 @@ describe 'apt::source' do
       it { is_expected.to compile.and_raise_error(%r{Mixing path-style suites}) }
     end
 
-    context 'basic deb822 source' do
+    context 'with basic deb822 source' do
       let :params do
         super().merge(
           {
@@ -527,7 +518,7 @@ describe 'apt::source' do
       SOURCE
     end
 
-    context 'complex deb822 source' do
+    context 'with complex deb822 source' do
       let :params do
         super().merge(
           {
@@ -563,7 +554,7 @@ describe 'apt::source' do
       SOURCE
     end
 
-    context 'path based deb822 source' do
+    context 'with path based deb822 source' do
       let :params do
         super().merge(
           {
@@ -600,7 +591,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_notify_update(true) }
     end
 
-    context 'absent deb822 source' do
+    context 'with absent deb822 source' do
       let :params do
         super().merge(
           {
@@ -612,7 +603,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_ensure('absent') }
     end
 
-    context 'absent complex deb822 source' do
+    context 'with absent complex deb822 source' do
       let :params do
         super().merge(
           {

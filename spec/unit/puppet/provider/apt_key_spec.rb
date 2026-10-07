@@ -13,6 +13,32 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
     it 'has a prefetch method' do
       expect(described_class).to respond_to :prefetch
     end
+
+    {
+      '6F6B15509CF8E59E6E469F327F438280EF8D349F' => :fingerprint,
+      '7F438280EF8D349F' => :long,
+      'EF8D349F' => :short,
+    }.each do |id, property|
+      it "matches a resource by #{property}" do
+        provider = described_class.new(property => id)
+        resource = Puppet::Type::Apt_key.new(name: id)
+        allow(described_class).to receive(:instances).and_return([provider])
+
+        described_class.prefetch(id => resource)
+
+        expect(resource.provider).to equal(provider)
+      end
+    end
+
+    it 'leaves unmatched resources unchanged' do
+      resource = Puppet::Type::Apt_key.new(name: 'EF8D349F')
+      provider = resource.provider
+      allow(described_class).to receive(:instances).and_return([])
+
+      described_class.prefetch('EF8D349F' => resource)
+
+      expect(resource.provider).to equal(provider)
+    end
   end
 
   context 'with self.instances no key' do
@@ -125,7 +151,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:tempfile).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:tempfile).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:tempfile)
       provider.create
       expect(provider).to be_exist
     end
@@ -139,7 +166,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file)
       provider.create
       expect(provider).to be_exist
     end
@@ -154,7 +182,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file)
       provider.create
       expect(provider).to be_exist
     end
@@ -241,6 +270,91 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
         key_size: '1024',
         key_type: :ecdsa,
       )
+    end
+  end
+
+  describe 'source_to_file' do
+    let(:resource) { Puppet::Type::Apt_key.new(name: 'EF8D349F', source: source) }
+    let(:provider) { described_class.new(resource) }
+    let(:source) { 'http://example.com/key.gpg' }
+    let(:uri) { URI.parse(source) }
+    let(:key_file) { instance_double(Tempfile) }
+
+    before(:each) do
+      allow(URI).to receive(:parse).with(source).and_return(uri)
+      allow(uri).to receive(:open).and_return(StringIO.new('key data'))
+      allow(provider).to receive(:tempfile).with('key data').and_return(key_file)
+    end
+
+    it 'downloads HTTP without basic authentication options' do
+      expect(uri).to receive(:open).with(no_args)
+      expect(provider.source_to_file(source)).to equal(key_file)
+    end
+
+    context 'with HTTPS' do
+      let(:source) { 'https://example.com/key.gpg' }
+
+      it 'uses certificate verification by default' do
+        expect(uri).to receive(:open).with(no_args)
+        expect(provider.source_to_file(source)).to equal(key_file)
+      end
+
+      it 'disables certificate verification when weak_ssl is set' do
+        resource[:weak_ssl] = true
+        expect(uri).to receive(:open).with(ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+        expect(provider.source_to_file(source)).to equal(key_file)
+      end
+    end
+
+    context 'with basic authentication' do
+      let(:source) { URI::HTTP.build(host: 'example.com', path: '/key.gpg', userinfo: ['user', 'password'].join(':')).to_s }
+
+      it 'passes credentials separately from the URI' do
+        expect(uri).to receive(:open).with(http_basic_authentication: ['user', 'password'])
+        expect(provider.source_to_file(source)).to equal(key_file)
+        expect(uri.userinfo).to be_nil
+      end
+    end
+
+    it 'includes the source in HTTP errors' do
+      allow(uri).to receive(:open).and_raise(OpenURI::HTTPError.new('404 Not Found', StringIO.new))
+
+      expect { provider.source_to_file(source) }.to raise_error(RuntimeError, "404 Not Found for #{source}")
+    end
+
+    it 'translates socket errors' do
+      allow(uri).to receive(:open).and_raise(SocketError)
+
+      expect { provider.source_to_file(source) }.to raise_error(RuntimeError, "could not resolve #{source}")
+    end
+  end
+
+  describe 'fingerprint verification' do
+    let(:fingerprint) { '6F6B15509CF8E59E6E469F327F438280EF8D349F' }
+    let(:provider) { described_class.new(Puppet::Type::Apt_key.new(name: fingerprint)) }
+    let(:key_file) { instance_double(Tempfile, path: '/key.gpg') }
+
+    before(:each) do
+      allow(File).to receive(:executable?).with('/usr/bin/gpg').and_return(true)
+    end
+
+    it 'accepts a matching fingerprint among multiple keys' do
+      allow(provider).to receive(:execute).and_return("OTHER\n#{fingerprint}\n")
+
+      expect { provider.verify_fingerprint(key_file) }.not_to raise_error
+    end
+
+    it 'rejects a mismatched fingerprint' do
+      allow(provider).to receive(:execute).and_return("OTHER\n")
+
+      expect { provider.verify_fingerprint(key_file) }.to raise_error(RuntimeError, %r{fingerprint from content/source don't match})
+    end
+
+    it 'warns when gpg is unavailable' do
+      allow(File).to receive(:executable?).with('/usr/bin/gpg').and_return(false)
+      expect(provider).to receive(:warning).with('/usr/bin/gpg cannot be found for verification of the id.')
+
+      provider.verify_fingerprint(key_file)
     end
   end
 end

@@ -27,14 +27,9 @@ describe 'apt::backports', type: :class do
 
       it {
         expect(subject).to contain_apt__source('backports').with(
-          location: 'http://archive.ubuntu.com/ubuntu',
-          repos: 'main universe multiverse restricted',
-          release: "#{codename}-backports",
-          pin: {
-            'priority' => 200,
-            'release' => "#{codename}-backports",
-          },
-          keyring: '/usr/share/keyrings/ubuntu-archive-keyring.gpg',
+          location: 'http://archive.ubuntu.com/ubuntu', repos: 'main universe multiverse restricted',
+          release: "#{codename}-backports", pin: { 'priority' => 200, 'release' => "#{codename}-backports" },
+          keyring: '/usr/share/keyrings/ubuntu-archive-keyring.gpg'
         )
       }
     end
@@ -66,15 +61,7 @@ describe 'apt::backports', type: :class do
         }
       end
 
-      it {
-        expect(subject).to contain_apt__source('backports').with(
-          location: 'http://archive.ubuntu.com/ubuntu-test',
-          key: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
-          repos: 'main',
-          release: 'vivid',
-          pin: { 'priority' => 90, 'release' => 'vivid' },
-        )
-      }
+      it { is_expected.to contain_apt__source('backports').with(params.merge(pin: { 'priority' => 90, 'release' => 'vivid' })) }
     end
 
     context "when set things with hashes on ubuntu #{release_major}" do
@@ -218,14 +205,9 @@ describe 'apt::backports', type: :class do
 
       it {
         expect(subject).to contain_apt__source('backports').with(
-          location: 'http://deb.debian.org/debian',
-          repos: 'main contrib non-free non-free-firmware',
-          release: 'bookworm-backports',
-          pin: {
-            'priority' => 200,
-            'codename' => 'bookworm-backports',
-          },
-          keyring: '/usr/share/keyrings/debian-archive-keyring.gpg',
+          location: 'http://deb.debian.org/debian', repos: 'main contrib non-free non-free-firmware',
+          release: 'bookworm-backports', pin: { 'priority' => 200, 'codename' => 'bookworm-backports' },
+          keyring: '/usr/share/keyrings/debian-archive-keyring.gpg'
         )
       }
     end

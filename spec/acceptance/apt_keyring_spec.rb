@@ -13,13 +13,13 @@ describe 'apt::keyring' do
       }
     MANIFEST
 
-    it 'applies idempotently' do
+    it 'applies idempotently' do # rubocop:disable RSpec/NoExpectationExample -- idempotent_apply checks for changes.
       retry_on_error_matching do
         idempotent_apply(keyring_pp)
       end
     end
 
-    it 'expects file content to be present and correct' do
+    it 'expects file content to be present and correct' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks exit status.
       retry_on_error_matching do
         run_shell(PUPPETLABS_KEYRING_CHECK_COMMAND.to_s)
       end

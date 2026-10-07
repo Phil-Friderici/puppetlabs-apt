@@ -33,27 +33,27 @@ MANIFEST
 
 describe 'apt class' do
   context 'with test start reset' do
-    it 'fixes the sources.list' do
+    it 'fixes the sources.list' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks exit status.
       run_shell('cp /etc/apt/sources.list /tmp')
     end
   end
 
   context 'with all the things' do
-    it 'works with no errors' do
+    it 'works with no errors' do # rubocop:disable RSpec/NoExpectationExample -- apply_manifest checks exit status.
       # Apply the manifest (Retry if timeout error is received from key pool)
       retry_on_error_matching do
         apply_manifest(everything_everything_pp, catch_failures: true)
       end
     end
 
-    it 'stills work' do
+    it 'stills work' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks exit status.
       run_shell('apt-get update')
       run_shell('apt-get -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade')
     end
   end
 
   context 'with test end reset' do
-    it 'fixes the sources.list' do
+    it 'fixes the sources.list' do # rubocop:disable RSpec/NoExpectationExample -- run_shell checks exit status.
       run_shell('cp /tmp/sources.list /etc/apt')
     end
   end
