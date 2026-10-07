@@ -179,7 +179,9 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
           found_match = true if line.chomp == name
         end
         unless found_match
-          raise(_('The id in your manifest %{_resource} and the fingerprint from content/source don\'t match. Check for an error in the id and content/source is legitimate.') % { _resource: resource[:name] }) # rubocop:disable Layout/LineLength
+          message = _('The id in your manifest %{_resource} and the fingerprint from content/source don\'t match. ' \
+                      'Check for an error in the id and content/source is legitimate.')
+          raise(message % { _resource: resource[:name] })
         end
       else
         warning('/usr/bin/gpg cannot be found for verification of the id.')
