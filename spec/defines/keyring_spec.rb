@@ -18,7 +18,7 @@ describe 'apt::keyring' do
 
       context 'with default directory' do
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
+          expect(subject).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
             ensure: 'file',
             mode: '0644',
             owner: 'root',
@@ -28,7 +28,7 @@ describe 'apt::keyring' do
         }
 
         it {
-          is_expected.to contain_class('apt')
+          expect(subject).to contain_class('apt')
         }
       end
 
@@ -41,7 +41,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/usr/share/keyrings/puppetlabs-keyring.gpg').with(
+          expect(subject).to contain_file('/usr/share/keyrings/puppetlabs-keyring.gpg').with(
             ensure: 'file',
             mode: '0644',
             owner: 'root',
@@ -51,7 +51,7 @@ describe 'apt::keyring' do
         }
 
         it {
-          is_expected.to contain_file('/usr/share/keyrings').with(
+          expect(subject).to contain_file('/usr/share/keyrings').with(
             ensure: 'directory',
             mode: '0755',
           )
@@ -66,7 +66,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
+          expect(subject).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
             ensure: 'file',
             content: 'GPG KEY CONTENT',
           )
@@ -82,7 +82,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/custom-name.gpg')
+          expect(subject).to contain_file('/etc/apt/keyrings/custom-name.gpg')
         }
       end
 
@@ -94,7 +94,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
+          expect(subject).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
             ensure: 'absent',
           )
         }
@@ -109,7 +109,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to raise_error(%r{Parameters 'source' and 'content' are mutually exclusive})
+          expect(subject).to raise_error(%r{Parameters 'source' and 'content' are mutually exclusive})
         }
       end
 
@@ -121,7 +121,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to raise_error(%r{One of 'source' or 'content' parameters are required})
+          expect(subject).to raise_error(%r{One of 'source' or 'content' parameters are required})
         }
       end
     end
