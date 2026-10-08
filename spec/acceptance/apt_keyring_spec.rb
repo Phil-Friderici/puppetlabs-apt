@@ -14,19 +14,11 @@ describe 'apt::keyring' do
     MANIFEST
 
     it 'applies idempotently' do
-      expect do
-        retry_on_error_matching do
-          idempotent_apply(keyring_pp)
-        end
-      end.not_to raise_error
+      expect(retry_on_error_matching { idempotent_apply(keyring_pp) }).to be_truthy
     end
 
     it 'expects file content to be present and correct' do
-      expect do
-        retry_on_error_matching do
-          run_shell(PUPPETLABS_KEYRING_CHECK_COMMAND.to_s)
-        end
-      end.not_to raise_error
+      expect(retry_on_error_matching { run_shell(PUPPETLABS_KEYRING_CHECK_COMMAND.to_s) }).to be_truthy
     end
   end
 end

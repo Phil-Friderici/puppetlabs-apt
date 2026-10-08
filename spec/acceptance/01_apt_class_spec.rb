@@ -11,10 +11,7 @@ describe 'apt class' do
       MANIFEST
 
       # Run it twice and test for idempotency
-      expect do
-        apply_manifest(pp, catch_failures: true)
-        apply_manifest(pp, catch_changes: true)
-      end.not_to raise_error
+      expect([apply_manifest(pp, catch_failures: true), apply_manifest(pp, catch_changes: true)]).to all(be_truthy)
     end
   end
 end
