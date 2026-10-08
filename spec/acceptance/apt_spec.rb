@@ -34,27 +34,35 @@ MANIFEST
 describe 'apt class' do
   context 'with test start reset' do
     it 'fixes the sources.list' do
-      run_shell('cp /etc/apt/sources.list /tmp')
+      expect do
+        run_shell('cp /etc/apt/sources.list /tmp')
+      end.not_to raise_error
     end
   end
 
   context 'with all the things' do
     it 'works with no errors' do
       # Apply the manifest (Retry if timeout error is received from key pool)
-      retry_on_error_matching do
-        apply_manifest(everything_everything_pp, catch_failures: true)
-      end
+      expect do
+        retry_on_error_matching do
+          apply_manifest(everything_everything_pp, catch_failures: true)
+        end
+      end.not_to raise_error
     end
 
     it 'stills work' do
-      run_shell('apt-get update')
-      run_shell('apt-get -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade')
+      expect do
+        run_shell('apt-get update')
+        run_shell('apt-get -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade')
+      end.not_to raise_error
     end
   end
 
   context 'with test end reset' do
     it 'fixes the sources.list' do
-      run_shell('cp /tmp/sources.list /etc/apt')
+      expect do
+        run_shell('cp /tmp/sources.list /etc/apt')
+      end.not_to raise_error
     end
   end
 end
