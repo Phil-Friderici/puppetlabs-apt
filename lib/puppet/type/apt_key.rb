@@ -55,7 +55,6 @@ Puppet::Type.newtype(:apt_key) do
       id
     end
   end
-  # rubocop:enable Metrics/BlockLength
 
   newparam(:content) do
     desc 'The content of, or string representing, a GPG key.'
@@ -155,3 +154,4 @@ Puppet::Type.newtype(:apt_key) do
     MANIFEST
   end
 end
+# rubocop:enable Metrics/BlockLength
