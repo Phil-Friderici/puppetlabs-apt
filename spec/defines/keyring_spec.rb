@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe 'apt::keyring' do
-  subject(:compiled_catalogue) { super() }
+  let(:compiled_catalogue) { subject }
 
   let(:title) { 'puppetlabs-keyring.gpg' }
   let(:params) do
