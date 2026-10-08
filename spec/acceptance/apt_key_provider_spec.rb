@@ -441,7 +441,7 @@ hkp_pool_pp = <<-MANIFEST
         }
 MANIFEST
 
-hkps_protocol_supported = host_inventory['facter']['os']['family'] =~ %r{Ubuntu}i && \
+hkps_protocol_supported = host_inventory['facter']['os']['family'] =~ %r{Ubuntu}i &&
                           host_inventory['facter']['os']['release']['major'] =~ %r{^18\.04}
 
 if hkps_protocol_supported
@@ -667,31 +667,31 @@ describe 'apt_key' do
     MANIFEST
 
     it 'add an apt_key resource' do
-      apply_manifest_twice(ensure_present_pp)
+      expect(apply_manifest_twice(ensure_present_pp)).to be_truthy
     end
 
     it 'remove the apt_key resource' do
-      apply_manifest_twice(ensure_absent_pp)
+      expect(apply_manifest_twice(ensure_absent_pp)).to be_truthy
     end
   end
 
   describe 'content =>' do
     context 'with puppetlabs gpg key' do
       it 'applies without error' do
-        # Apply the manifest (Retry if timeout error is received from key pool)
-        retry_on_error_matching do
-          apply_manifest(gpg_key_pp, catch_failures: true)
-        end
-
-        apply_manifest(gpg_key_pp, catch_changes: true)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([
+                 retry_on_error_matching { apply_manifest(gpg_key_pp, catch_failures: true) },
+                 apply_manifest(gpg_key_pp, catch_changes: true),
+                 run_shell(PUPPETLABS_KEY_CHECK_COMMAND),
+               ]).to all(be_truthy)
       end
     end
 
     context 'with multiple keys' do
       it 'runs without errors' do
-        apply_manifest_twice(multiple_keys_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([
+                 apply_manifest_twice(multiple_keys_pp),
+                 run_shell(PUPPETLABS_KEY_CHECK_COMMAND),
+               ]).to all(be_truthy)
       end
     end
 
@@ -707,24 +707,22 @@ describe 'apt_key' do
   describe 'server =>' do
     context 'with hkp://pgp.mit.edu:80' do
       it 'applies without error' do
-        retry_on_error_matching do
-          apply_manifest(hkp_pool_pp, catch_failures: true)
-        end
-
-        apply_manifest(hkp_pool_pp, catch_changes: true)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([
+                 retry_on_error_matching { apply_manifest(hkp_pool_pp, catch_failures: true) },
+                 apply_manifest(hkp_pool_pp, catch_changes: true),
+                 run_shell(PUPPETLABS_KEY_CHECK_COMMAND),
+               ]).to all(be_truthy)
       end
     end
 
     if hkps_protocol_supported
       context 'with hkps://keyserver.ubuntu.com' do
         it 'applies without error' do
-          retry_on_error_matching do
-            apply_manifest(hkps_ubuntu_pp, catch_failures: true)
-          end
-
-          apply_manifest(hkps_ubuntu_pp, catch_changes: true)
-          run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+          expect([
+                   retry_on_error_matching { apply_manifest(hkps_ubuntu_pp, catch_failures: true) },
+                   apply_manifest(hkps_ubuntu_pp, catch_changes: true),
+                   run_shell(PUPPETLABS_KEY_CHECK_COMMAND),
+                 ]).to all(be_truthy)
         end
       end
     end
@@ -749,13 +747,11 @@ describe 'apt_key' do
   describe 'source =>' do
     context 'with http://' do
       it 'applies without error' do
-        apply_manifest_twice(http_works_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(http_works_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'works with userinfo' do
-        apply_manifest_twice(http_works_userinfo_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(http_works_userinfo_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'fails with a 404' do
@@ -778,8 +774,7 @@ describe 'apt_key' do
       end
 
       it 'applies without error' do
-        apply_manifest_twice(ftp_works_pp)
-        run_shell(CENTOS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(ftp_works_pp), run_shell(CENTOS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'fails with a 550' do
@@ -797,18 +792,15 @@ describe 'apt_key' do
 
     context 'with https://' do
       it 'applies without error' do
-        apply_manifest_twice(https_works_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(https_works_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'works with weak ssl' do
-        apply_manifest_twice(https_with_weak_ssl_works_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(https_with_weak_ssl_works_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'works with userinfo' do
-        apply_manifest_twice(https_userinfo_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(https_userinfo_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
 
       it 'fails with a 404' do
@@ -835,8 +827,7 @@ describe 'apt_key' do
       end
 
       it 'applies without error' do
-        apply_manifest_twice(path_exists_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(path_exists_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
     end
 
@@ -868,8 +859,7 @@ describe 'apt_key' do
   describe 'options =>' do
     context 'with debug' do
       it 'applies without error' do
-        apply_manifest_twice(debug_works_pp)
-        run_shell(PUPPETLABS_KEY_CHECK_COMMAND)
+        expect([apply_manifest_twice(debug_works_pp), run_shell(PUPPETLABS_KEY_CHECK_COMMAND)]).to all(be_truthy)
       end
     end
   end
@@ -877,7 +867,7 @@ describe 'apt_key' do
   describe 'fingerprint validation against source/content' do
     context 'with fingerprint in id matches fingerprint from remote key' do
       it 'applies without error' do
-        apply_manifest_twice(fingerprint_match_pp)
+        expect(apply_manifest_twice(fingerprint_match_pp)).to be_truthy
       end
     end
 
@@ -902,19 +892,22 @@ describe 'apt_key' do
 
     context 'when refresh => true' do
       it 'updates an expired key' do
-        retry_on_error_matching do
+        result = retry_on_error_matching do
           apply_manifest(refresh_true_pp)
           # Check key has been updated to new version
           run_shell(PUPPETLABS_EXP_CHECK_COMMAND.to_s)
         end
+        expect(result).to be_truthy
       end
     end
 
     context 'when refresh => false' do
       it 'does not replace an expired key' do
-        apply_manifest(refresh_false_pp)
         # Expired key is present and has not been updated by the new version
-        run_shell(PUPPETLABS_EXP_CHECK_COMMAND.to_s, expect_failures: true)
+        expect([
+                 apply_manifest(refresh_false_pp),
+                 run_shell(PUPPETLABS_EXP_CHECK_COMMAND.to_s, expect_failures: true),
+               ]).to all(be_truthy)
       end
     end
   end

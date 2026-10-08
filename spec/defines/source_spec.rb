@@ -13,17 +13,17 @@ describe 'apt::source' do
         name: 'Debian',
         release: {
           major: '9',
-          full: '9.0'
+          full: '9.0',
         },
         distro: {
           codename: 'stretch',
-          id: 'Debian'
-        }
-      }
+          id: 'Debian',
+        },
+      },
     }
   end
 
-  context 'with defaults' do
+  shared_examples 'source defaults' do
     context 'without location' do
       it do
         expect(subject).to raise_error(Puppet::Error, %r{source entry without specifying a location})
@@ -37,25 +37,25 @@ describe 'apt::source' do
         expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main\n})
       }
 
-      context 'with repos' do
-        context 'as empty array' do
-          let(:params) { super().merge(repos: []) }
+      context 'with empty repos array' do
+        let(:params) { super().merge(repos: []) }
 
-          it {
-            expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy\n})
-          }
-        end
+        it {
+          expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy\n})
+        }
+      end
 
-        context 'as non-empty array' do
-          let(:params) { super().merge(repos: ['main', 'non-free', 'contrib']) }
+      context 'with non-empty repos array' do
+        let(:params) { super().merge(repos: ['main', 'non-free', 'contrib']) }
 
-          it {
-            expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main non-free contrib\n})
-          }
-        end
+        it {
+          expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').without_content(%r{# my_source\ndeb-src hello.there wheezy main non-free contrib\n})
+        }
       end
     end
   end
+
+  include_examples 'source defaults'
 
   describe 'no defaults' do
     context 'with complex pin' do
@@ -64,7 +64,7 @@ describe 'apt::source' do
           location: 'hello.there',
           pin: { 'release' => 'wishwash',
                  'explanation' => 'wishwash',
-                 'priority' => 1001 }
+                 'priority' => 1001 },
         }
       end
 
@@ -92,7 +92,7 @@ describe 'apt::source' do
           key: id,
           pin: '10',
           architecture: 'x86_64',
-          allow_unsigned: true
+          allow_unsigned: true,
         }
       end
 
@@ -126,11 +126,11 @@ describe 'apt::source' do
             'server' => 'pgp.mit.edu',
             'content' => 'GPG key content',
             'source' => 'http://apt.puppetlabs.com/pubkey.gpg',
-            'weak_ssl' => true
+            'weak_ssl' => true,
           },
           pin: '10',
           architecture: 'x86_64',
-          allow_unsigned: true
+          allow_unsigned: true,
         }
       end
 
@@ -146,12 +146,10 @@ describe 'apt::source' do
       }
 
       it {
-        expect(subject).to contain_apt__key("Add key: #{id} from Apt::Source my_source").that_comes_before('Apt::Setting[list-my_source]').with(ensure: 'refreshed',
-                                                                                                                                                id: id,
-                                                                                                                                                server: 'pgp.mit.edu',
-                                                                                                                                                content: 'GPG key content',
-                                                                                                                                                source: 'http://apt.puppetlabs.com/pubkey.gpg',
-                                                                                                                                                weak_ssl: true)
+        expect(subject).to contain_apt__key("Add key: #{id} from Apt::Source my_source")
+          .that_comes_before('Apt::Setting[list-my_source]')
+          .with(ensure: 'refreshed', id: id, server: 'pgp.mit.edu', content: 'GPG key content',
+                source: 'http://apt.puppetlabs.com/pubkey.gpg', weak_ssl: true)
       }
     end
   end
@@ -160,7 +158,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        allow_insecure: true
+        allow_insecure: true,
       }
     end
 
@@ -173,7 +171,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        allow_unsigned: true
+        allow_unsigned: true,
       }
     end
 
@@ -186,7 +184,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        check_valid_until: false
+        check_valid_until: false,
       }
     end
 
@@ -199,7 +197,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        check_valid_until: true
+        check_valid_until: true,
       }
     end
 
@@ -212,7 +210,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        keyring: '/usr/share/keyrings/foo-archive-keyring.gpg'
+        keyring: '/usr/share/keyrings/foo-archive-keyring.gpg',
       }
     end
 
@@ -229,7 +227,7 @@ describe 'apt::source' do
         location: 'hello.there',
         architecture: 'amd64',
         allow_unsigned: true,
-        keyring: '/usr/share/keyrings/foo-archive-keyring.gpg'
+        keyring: '/usr/share/keyrings/foo-archive-keyring.gpg',
       }
     end
 
@@ -248,20 +246,20 @@ describe 'apt::source' do
           name: 'Debian',
           release: {
             major: '7',
-            full: '7.0'
+            full: '7.0',
           },
           distro: {
             codename: 'wheezy',
-            id: 'Debian'
-          }
-        }
+            id: 'Debian',
+          },
+        },
       }
     end
     let :params do
       {
         location: 'hello.there',
         include: { 'deb' => false, 'src' => true },
-        architecture: 'x86_64'
+        architecture: 'x86_64',
       }
     end
 
@@ -277,7 +275,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        include: { 'deb' => false, 'src' => true }
+        include: { 'deb' => false, 'src' => true },
       }
     end
 
@@ -290,7 +288,7 @@ describe 'apt::source' do
     let :params do
       {
         location: 'hello.there',
-        include: { 'src' => true }
+        include: { 'src' => true },
       }
     end
 
@@ -303,7 +301,7 @@ describe 'apt::source' do
     let :params do
       {
         include: { 'deb' => false },
-        location: 'hello.there'
+        location: 'hello.there',
       }
     end
 
@@ -318,7 +316,7 @@ describe 'apt::source' do
     let :params do
       {
         include: { 'deb' => false, 'src' => true },
-        location: 'hello.there'
+        location: 'hello.there',
       }
     end
 
@@ -332,7 +330,7 @@ describe 'apt::source' do
   context 'with ensure => absent' do
     let :params do
       {
-        ensure: 'absent'
+        ensure: 'absent',
       }
     end
 
@@ -350,12 +348,12 @@ describe 'apt::source' do
             name: 'Debian',
             release: {
               major: '8',
-              full: '8.0'
+              full: '8.0',
             },
             distro: {
-              id: 'Debian'
-            }
-          }
+              id: 'Debian',
+            },
+          },
         }
       end
       let(:params) { { location: 'hello.there' } }
@@ -393,7 +391,7 @@ describe 'apt::source' do
       let :params do
         {
           location: 'hello.there',
-          pin: true
+          pin: true,
         }
       end
 
@@ -405,7 +403,7 @@ describe 'apt::source' do
     context 'with notify_update = undef (default)' do
       let :params do
         {
-          location: 'hello.there'
+          location: 'hello.there',
         }
       end
 
@@ -416,7 +414,7 @@ describe 'apt::source' do
       let :params do
         {
           location: 'hello.there',
-          notify_update: true
+          notify_update: true,
         }
       end
 
@@ -427,7 +425,7 @@ describe 'apt::source' do
       let :params do
         {
           location: 'hello.there',
-          notify_update: false
+          notify_update: false,
         }
       end
 
@@ -436,7 +434,13 @@ describe 'apt::source' do
   end
 
   describe 'deb822 sources' do
-    context 'suite contains a slash but does not end with slash (should require Components)' do
+    let :params do
+      {
+        source_format: 'sources',
+      }
+    end
+
+    context 'when the suite contains a slash but does not end with slash (should require Components)' do
       let :params do
         super().merge(
           {
@@ -452,7 +456,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_content(%r{Components: main}) }
     end
 
-    context 'suite ends with slash (should omit Components)' do
+    context 'when the suite ends with slash (should omit Components)' do
       let :params do
         super().merge(
           {
@@ -468,7 +472,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").without_content(%r{Components:}) }
     end
 
-    context 'multiple suites, all end with slash (should omit Components)' do
+    context 'when multiple suites all end with slash (should omit Components)' do
       let :params do
         super().merge(
           {
@@ -484,7 +488,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").without_content(%r{Components:}) }
     end
 
-    context 'multiple suites, not all end with slash (should raise error)' do
+    context 'when multiple suites do not all end with slash (should raise error)' do
       let :params do
         super().merge(
           {
@@ -498,18 +502,13 @@ describe 'apt::source' do
 
       it { is_expected.to compile.and_raise_error(%r{Mixing path-style suites}) }
     end
-    let :params do
-      {
-        source_format: 'sources',
-      }
-    end
 
-    context 'basic deb822 source' do
+    context 'with a basic deb822 source' do
       let :params do
         super().merge(
           {
             location: ['http://debian.mirror.iweb.ca/debian/'],
-            repos: ['main', 'contrib', 'non-free']
+            repos: ['main', 'contrib', 'non-free'],
           },
         )
       end
@@ -526,7 +525,7 @@ describe 'apt::source' do
       SOURCE
     end
 
-    context 'complex deb822 source' do
+    context 'with a complex deb822 source' do
       let :params do
         super().merge(
           {
@@ -540,7 +539,7 @@ describe 'apt::source' do
             allow_insecure: true,
             notify_update: false,
             check_valid_until: false,
-            keyring: '/foo'
+            keyring: '/foo',
           },
         )
       end
@@ -562,7 +561,7 @@ describe 'apt::source' do
       SOURCE
     end
 
-    context 'path based deb822 source' do
+    context 'with a path-based deb822 source' do
       let :params do
         super().merge(
           {
@@ -580,7 +579,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_content(%r{Trusted: yes}) }
     end
 
-    context '.list backwards compatibility' do
+    describe '.list backwards compatibility' do
       let :params do
         super().merge(
           {
@@ -591,7 +590,7 @@ describe 'apt::source' do
               id: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
               server: 'keyserver.ubuntu.com',
             },
-            pin: '-10'
+            pin: '-10',
           },
         )
       end
@@ -599,7 +598,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_notify_update(true) }
     end
 
-    context 'absent deb822 source' do
+    context 'without a deb822 source' do
       let :params do
         super().merge(
           {
@@ -611,7 +610,7 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_ensure('absent') }
     end
 
-    context 'absent complex deb822 source' do
+    context 'without a complex deb822 source' do
       let :params do
         super().merge(
           {
@@ -622,7 +621,7 @@ describe 'apt::source' do
             repos: ['main', 'contrib', 'non-free'],
             architecture: ['amd64', 'i386'],
             allow_unsigned: true,
-            notify_update: false
+            notify_update: false,
           },
         )
       end

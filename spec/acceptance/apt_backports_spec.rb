@@ -11,13 +11,11 @@ describe 'apt::backports' do
     end
 
     it 'applies idempotently' do
-      retry_on_error_matching do
-        idempotent_apply(pp)
-      end
+      expect(retry_on_error_matching { idempotent_apply(pp) }).to be_truthy
     end
 
     it 'provides backports apt sources' do
-      run_shell('apt-cache policy | grep --quiet backports')
+      expect(run_shell('apt-cache policy | grep --quiet backports')).to be_truthy
     end
   end
 end

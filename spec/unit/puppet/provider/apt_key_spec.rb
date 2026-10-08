@@ -125,7 +125,7 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:tempfile).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:tempfile).and_call_original
       provider.create
       expect(provider).to be_exist
     end
@@ -139,7 +139,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file).with('ftp://bla/herpderp.gpg')
       provider.create
       expect(provider).to be_exist
     end
@@ -154,7 +155,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file).with('https://bla/herpderp.gpg')
       provider.create
       expect(provider).to be_exist
     end
@@ -169,7 +171,7 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
         '160bit key fingerprint lowercase' => '6F6B15509CF8E59E6E469F327F438280EF8D349F'.downcase,
         '32bit key id 0x formatted' => '0xEF8D349F',
         '64bit key id 0x formatted' => '0x7F438280EF8D349F',
-        '160bit key fingerprint 0x formatted' => '0x6F6B15509CF8E59E6E469F327F438280EF8D349F'
+        '160bit key fingerprint 0x formatted' => '0x6F6B15509CF8E59E6E469F327F438280EF8D349F',
       }
       hash_of_keys.each do |key_type, value|
         it "#{key_type} #{value} is valid" do

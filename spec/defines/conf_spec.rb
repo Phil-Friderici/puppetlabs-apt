@@ -12,13 +12,13 @@ describe 'apt::conf', type: :define do
         name: 'Debian',
         release: {
           major: '9',
-          full: '9.0'
+          full: '9.0',
         },
         distro: {
           codename: 'stretch',
-          id: 'Debian'
-        }
-      }
+          id: 'Debian',
+        },
+      },
     }
   end
   let :title do
@@ -26,14 +26,11 @@ describe 'apt::conf', type: :define do
   end
 
   describe 'when creating an apt preference' do
-    let :default_params do
+    let :params do
       {
         priority: '00',
-        content: "Apt::Install-Recommends 0;\nApt::AutoRemove::InstallRecommends 1;\n"
+        content: "Apt::Install-Recommends 0;\nApt::AutoRemove::InstallRecommends 1;\n",
       }
-    end
-    let :params do
-      default_params
     end
 
     let :filename do
@@ -48,16 +45,12 @@ describe 'apt::conf', type: :define do
     }
 
     context 'with notify_update = true (default)' do
-      let :params do
-        default_params
-      end
-
       it { is_expected.to contain_apt__setting("conf-#{title}").with_notify_update(true) }
     end
 
     context 'with notify_update = false' do
       let :params do
-        default_params.merge(notify_update: false)
+        super().merge(notify_update: false)
       end
 
       it { is_expected.to contain_apt__setting("conf-#{title}").with_notify_update(false) }
@@ -67,7 +60,7 @@ describe 'apt::conf', type: :define do
   describe 'when creating a preference without content' do
     let :params do
       {
-        priority: '00'
+        priority: '00',
       }
     end
 
@@ -80,7 +73,7 @@ describe 'apt::conf', type: :define do
     let :params do
       {
         ensure: 'absent',
-        priority: '00'
+        priority: '00',
       }
     end
 

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 describe 'apt::keyring' do
+  let(:compiled_catalogue) { subject }
+
   let(:title) { 'puppetlabs-keyring.gpg' }
   let(:params) do
     {
@@ -14,22 +16,16 @@ describe 'apt::keyring' do
     context "on #{os}" do
       let(:facts) { os_facts }
 
-      it { is_expected.to compile }
+      it { expect(compiled_catalogue).to compile }
 
       context 'with default directory' do
-        it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
-            ensure: 'file',
-            mode: '0644',
-            owner: 'root',
-            group: 'root',
-            source: 'http://apt.puppetlabs.com/pubkey.gpg',
-          ).that_requires('File[keyrings]')
-        }
+        it do
+          expect(compiled_catalogue).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg')
+            .with(ensure: 'file', mode: '0644', owner: 'root', group: 'root', source: 'http://apt.puppetlabs.com/pubkey.gpg')
+            .that_requires('File[keyrings]')
+        end
 
-        it {
-          is_expected.to contain_class('apt')
-        }
+        it { expect(compiled_catalogue).to contain_class('apt') }
       end
 
       context 'with custom directory' do
@@ -40,22 +36,13 @@ describe 'apt::keyring' do
           }
         end
 
-        it {
-          is_expected.to contain_file('/usr/share/keyrings/puppetlabs-keyring.gpg').with(
-            ensure: 'file',
-            mode: '0644',
-            owner: 'root',
-            group: 'root',
-            source: 'http://apt.puppetlabs.com/pubkey.gpg',
-          ).that_requires('File[/usr/share/keyrings]')
-        }
+        it do
+          expect(compiled_catalogue).to contain_file('/usr/share/keyrings/puppetlabs-keyring.gpg')
+            .with(ensure: 'file', mode: '0644', owner: 'root', group: 'root', source: 'http://apt.puppetlabs.com/pubkey.gpg')
+            .that_requires('File[/usr/share/keyrings]')
+        end
 
-        it {
-          is_expected.to contain_file('/usr/share/keyrings').with(
-            ensure: 'directory',
-            mode: '0755',
-          )
-        }
+        it { expect(compiled_catalogue).to contain_file('/usr/share/keyrings').with(ensure: 'directory', mode: '0755') }
       end
 
       context 'with content parameter' do
@@ -65,12 +52,7 @@ describe 'apt::keyring' do
           }
         end
 
-        it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
-            ensure: 'file',
-            content: 'GPG KEY CONTENT',
-          )
-        }
+        it { expect(compiled_catalogue).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(ensure: 'file', content: 'GPG KEY CONTENT') }
       end
 
       context 'with custom filename' do
@@ -82,7 +64,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/custom-name.gpg')
+          expect(compiled_catalogue).to contain_file('/etc/apt/keyrings/custom-name.gpg')
         }
       end
 
@@ -94,7 +76,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
+          expect(compiled_catalogue).to contain_file('/etc/apt/keyrings/puppetlabs-keyring.gpg').with(
             ensure: 'absent',
           )
         }
@@ -109,7 +91,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to raise_error(%r{Parameters 'source' and 'content' are mutually exclusive})
+          expect(compiled_catalogue).to raise_error(%r{Parameters 'source' and 'content' are mutually exclusive})
         }
       end
 
@@ -121,7 +103,7 @@ describe 'apt::keyring' do
         end
 
         it {
-          is_expected.to raise_error(%r{One of 'source' or 'content' parameters are required})
+          expect(compiled_catalogue).to raise_error(%r{One of 'source' or 'content' parameters are required})
         }
       end
     end

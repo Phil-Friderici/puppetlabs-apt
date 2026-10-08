@@ -8,6 +8,17 @@ describe 'apt::backports', type: :class do
   # Shared examples for Ubuntu tests
   shared_examples 'ubuntu backports' do |release_major, release_full, codename|
     context "with defaults on ubuntu #{release_major}" do
+      source_params = {
+        location: 'http://archive.ubuntu.com/ubuntu',
+        repos: 'main universe multiverse restricted',
+        release: "#{codename}-backports",
+        pin: {
+          'priority' => 200,
+          'release' => "#{codename}-backports",
+        },
+        keyring: '/usr/share/keyrings/ubuntu-archive-keyring.gpg',
+      }
+
       let(:facts) do
         {
           os: {
@@ -15,31 +26,28 @@ describe 'apt::backports', type: :class do
             name: 'Ubuntu',
             release: {
               major: release_major,
-              full: release_full
+              full: release_full,
             },
             distro: {
               codename: codename,
-              id: 'Ubuntu'
-            }
-          }
+              id: 'Ubuntu',
+            },
+          },
         }
       end
 
-      it {
-        expect(subject).to contain_apt__source('backports').with(
-          location: 'http://archive.ubuntu.com/ubuntu',
-          repos: 'main universe multiverse restricted',
-          release: "#{codename}-backports",
-          pin: {
-            'priority' => 200,
-            'release' => "#{codename}-backports"
-          },
-          keyring: '/usr/share/keyrings/ubuntu-archive-keyring.gpg',
-        )
-      }
+      it { is_expected.to contain_apt__source('backports').with(source_params) }
     end
 
     context "with everything set on ubuntu #{release_major}" do
+      source_params = {
+        location: 'http://archive.ubuntu.com/ubuntu-test',
+        key: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
+        repos: 'main',
+        release: 'vivid',
+        pin: { 'priority' => 90, 'release' => 'vivid' },
+      }
+
       let(:facts) do
         {
           os: {
@@ -47,13 +55,13 @@ describe 'apt::backports', type: :class do
             name: 'Ubuntu',
             release: {
               major: release_major,
-              full: release_full
+              full: release_full,
             },
             distro: {
               codename: codename,
-              id: 'Ubuntu'
-            }
-          }
+              id: 'Ubuntu',
+            },
+          },
         }
       end
       let(:params) do
@@ -62,19 +70,11 @@ describe 'apt::backports', type: :class do
           release: 'vivid',
           repos: 'main',
           key: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
-          pin: '90'
+          pin: '90',
         }
       end
 
-      it {
-        expect(subject).to contain_apt__source('backports').with(
-          location: 'http://archive.ubuntu.com/ubuntu-test',
-          key: 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
-          repos: 'main',
-          release: 'vivid',
-          pin: { 'priority' => 90, 'release' => 'vivid' },
-        )
-      }
+      it { is_expected.to contain_apt__source('backports').with(source_params) }
     end
 
     context "when set things with hashes on ubuntu #{release_major}" do
@@ -85,23 +85,23 @@ describe 'apt::backports', type: :class do
             name: 'Ubuntu',
             release: {
               major: release_major,
-              full: release_full
+              full: release_full,
             },
             distro: {
               codename: codename,
-              id: 'Ubuntu'
-            }
-          }
+              id: 'Ubuntu',
+            },
+          },
         }
       end
       let(:params) do
         {
           key: {
-            'id' => 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553'
+            'id' => 'A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553',
           },
           pin: {
-            'priority' => '90'
-          }
+            'priority' => '90',
+          },
         }
       end
 
@@ -124,20 +124,20 @@ describe 'apt::backports', type: :class do
             name: 'Ubuntu',
             release: {
               major: release_major,
-              full: release_full
+              full: release_full,
             },
             distro: {
               codename: codename,
-              id: 'Ubuntu'
-            }
-          }
+              id: 'Ubuntu',
+            },
+          },
         }
       end
 
       context 'with invalid location' do
         let(:params) do
           {
-            location: true
+            location: true,
           }
         end
 
@@ -149,7 +149,7 @@ describe 'apt::backports', type: :class do
       context 'with invalid release' do
         let(:params) do
           {
-            release: true
+            release: true,
           }
         end
 
@@ -161,7 +161,7 @@ describe 'apt::backports', type: :class do
       context 'with invalid repos' do
         let(:params) do
           {
-            repos: true
+            repos: true,
           }
         end
 
@@ -173,7 +173,7 @@ describe 'apt::backports', type: :class do
       context 'with invalid key' do
         let(:params) do
           {
-            key: true
+            key: true,
           }
         end
 
@@ -185,7 +185,7 @@ describe 'apt::backports', type: :class do
       context 'with invalid pin' do
         let(:params) do
           {
-            pin: true
+            pin: true,
           }
         end
 
@@ -198,6 +198,17 @@ describe 'apt::backports', type: :class do
 
   describe 'debian/ubuntu tests' do
     context 'with defaults on debian' do
+      source_params = {
+        location: 'http://deb.debian.org/debian',
+        repos: 'main contrib non-free non-free-firmware',
+        release: 'bookworm-backports',
+        pin: {
+          'priority' => 200,
+          'codename' => 'bookworm-backports',
+        },
+        keyring: '/usr/share/keyrings/debian-archive-keyring.gpg',
+      }
+
       let(:facts) do
         {
           os: {
@@ -206,28 +217,17 @@ describe 'apt::backports', type: :class do
             release: {
               full: '12.5',
               major: '12',
-              minor: '5'
+              minor: '5',
             },
             distro: {
               codename: 'bookworm',
-              id: 'Debian'
-            }
-          }
+              id: 'Debian',
+            },
+          },
         }
       end
 
-      it {
-        expect(subject).to contain_apt__source('backports').with(
-          location: 'http://deb.debian.org/debian',
-          repos: 'main contrib non-free non-free-firmware',
-          release: 'bookworm-backports',
-          pin: {
-            'priority' => 200,
-            'codename' => 'bookworm-backports'
-          },
-          keyring: '/usr/share/keyrings/debian-archive-keyring.gpg',
-        )
-      }
+      it { is_expected.to contain_apt__source('backports').with(source_params) }
     end
 
     # Include shared examples for Ubuntu versions

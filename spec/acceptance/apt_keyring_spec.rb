@@ -3,7 +3,7 @@
 require 'spec_helper_acceptance'
 
 PUPPETLABS_KEYRING_CHECK_COMMAND = 'gpg --import /etc/apt/keyrings/puppetlabs-keyring.gpg && gpg --list-keys | grep -F -A 1 \'pub   rsa4096 2019-04-08 [SC]\'' \
-'| grep \'D6811ED3ADEEB8441AF5AA8F4528B6CD9E61EF26\''
+                                   '| grep \'D6811ED3ADEEB8441AF5AA8F4528B6CD9E61EF26\''
 
 describe 'apt::keyring' do
   context 'when using default values and source specified explicitly' do
@@ -14,15 +14,11 @@ describe 'apt::keyring' do
     MANIFEST
 
     it 'applies idempotently' do
-      retry_on_error_matching do
-        idempotent_apply(keyring_pp)
-      end
+      expect(retry_on_error_matching { idempotent_apply(keyring_pp) }).to be_truthy
     end
 
     it 'expects file content to be present and correct' do
-      retry_on_error_matching do
-        run_shell(PUPPETLABS_KEYRING_CHECK_COMMAND.to_s)
-      end
+      expect(retry_on_error_matching { run_shell(PUPPETLABS_KEYRING_CHECK_COMMAND.to_s) }).to be_truthy
     end
   end
 end
