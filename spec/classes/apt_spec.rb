@@ -377,7 +377,7 @@ describe 'apt' do
     }
   end
 
-  context 'with entries for /etc/apt/auth.conf' do
+  shared_examples 'with entries for /etc/apt/auth.conf' do
     facts_hash = {
       'Ubuntu 18.04' => {
         os: {
@@ -478,20 +478,26 @@ describe 'apt' do
             super().merge(manage_auth_conf: true)
           end
 
-          auth_conf_content = <<~CONTENT
-            // This file is managed by Puppet. DO NOT EDIT.
-            machine deb.example.net login foologin password secret
-            machine apt.example.com login aptlogin password supersecret
-          CONTENT
+          let(:auth_conf_content) do
+            <<~CONTENT
+              // This file is managed by Puppet. DO NOT EDIT.
+              machine deb.example.net login foologin password secret
+              machine apt.example.com login aptlogin password supersecret
+            CONTENT
+          end
 
-          it {
-            expect(subject).to contain_file('/etc/apt/auth.conf').with(ensure: 'present',
-                                                                       owner: '_apt',
-                                                                       group: 'root',
-                                                                       mode: '0600',
-                                                                       notify: 'Class[Apt::Update]',
-                                                                       content: sensitive(auth_conf_content))
-          }
+          let(:auth_conf_attributes) do
+            {
+              ensure: 'present',
+              owner: '_apt',
+              group: 'root',
+              mode: '0600',
+              notify: 'Class[Apt::Update]',
+              content: sensitive(auth_conf_content),
+            }
+          end
+
+          it { is_expected.to contain_file('/etc/apt/auth.conf').with(auth_conf_attributes) }
         end
 
         context 'with manage_auth_conf => false' do
@@ -527,6 +533,8 @@ describe 'apt' do
       end
     end
   end
+
+  include_examples 'with entries for /etc/apt/auth.conf'
 
   context 'with sources defined on valid os.family' do
     let :facts do
