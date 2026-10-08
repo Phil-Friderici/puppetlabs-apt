@@ -3,6 +3,8 @@
 require 'pathname'
 require 'puppet/parameter/boolean'
 
+# Puppet's resource type API defines its parameters and properties in one DSL block.
+# rubocop:disable Metrics/BlockLength
 Puppet::Type.newtype(:apt_key) do
   @doc = <<-MANIFEST
     @summary This type provides Puppet with the capabilities to manage GPG keys needed
@@ -45,6 +47,7 @@ Puppet::Type.newtype(:apt_key) do
       id
     end
   end
+  # rubocop:enable Metrics/BlockLength
 
   newparam(:content) do
     desc 'The content of, or string representing, a GPG key.'
