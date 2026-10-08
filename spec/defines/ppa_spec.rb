@@ -423,7 +423,9 @@ describe 'apt::ppa' do
     it {
       expect(subject).to contain_tidy("remove-apt-repository-script-#{title}")
         .with('path' => '/opt/puppetlabs/puppet/cache/add-apt-repository-user-ubuntu-foo-trusty.sh')
+    }
 
+    it {
       expect(subject).to contain_tidy("remove-apt-repository-#{title}")
         .with('path' => '/etc/apt/sources.list.d/user-ubuntu-foo-trusty.list')
         .that_notifies('Class[Apt::Update]')

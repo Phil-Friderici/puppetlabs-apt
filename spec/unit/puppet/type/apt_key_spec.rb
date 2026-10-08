@@ -163,12 +163,8 @@ describe Puppet::Type.type(:apt_key) do
     end
 
     it 'raises an error if refresh => true and ensure => absent' do
-      expect {
-        Puppet::Type.type(:apt_key).new(id: 'EF8D349F',
-                                        source: 'http://apt.puppetlabs.com/pubkey.gpg',
-                                        ensure: :absent,
-                                        refresh: true)
-      }.to raise_error(%r{ensure => absent and refresh => true are mutually exclusive})
+      expect { Puppet::Type.type(:apt_key).new(id: 'EF8D349F', source: 'http://apt.puppetlabs.com/pubkey.gpg', ensure: :absent, refresh: true) }
+        .to raise_error(%r{ensure => absent and refresh => true are mutually exclusive})
     end
 
     it 'raises an error if a weird length key is used' do

@@ -125,7 +125,7 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:tempfile).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:tempfile).and_call_original
       provider.create
       expect(provider).to be_exist
     end
@@ -139,7 +139,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file).with('ftp://bla/herpderp.gpg')
       provider.create
       expect(provider).to be_exist
     end
@@ -154,7 +155,8 @@ describe Puppet::Type.type(:apt_key).provider(:apt_key) do
 
       provider = described_class.new(resource)
       expect(provider).not_to be_exist
-      expect(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      allow(provider).to receive(:source_to_file).and_return(Tempfile.new('foo'))
+      expect(provider).to receive(:source_to_file).with('https://bla/herpderp.gpg')
       provider.create
       expect(provider).to be_exist
     end
