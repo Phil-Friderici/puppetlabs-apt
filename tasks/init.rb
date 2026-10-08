@@ -6,19 +6,18 @@ require 'open3'
 require 'puppet'
 
 def apt_get(action)
-  cmd = ['apt-get', action]
-  cmd << '-y' if ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
-  if ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
-    ENV['DEBIAN_FRONTEND'] = 'noninteractive'
-    cmd << '-o'
-    cmd << 'Dpkg::Options="--force-confdef"'
-    cmd << '-o'
-    cmd << 'Dpkg::Options="--force-confold"'
-  end
-  stdout, stderr, status = Open3.capture3(*cmd)
+  stdout, stderr, status = Open3.capture3(*apt_get_command(action))
   raise Puppet::Error, stderr if status != 0
 
   { status: stdout.strip }
+end
+
+def apt_get_command(action)
+  cmd = ['apt-get', action]
+  return cmd unless ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
+
+  ENV['DEBIAN_FRONTEND'] = 'noninteractive'
+  cmd.concat(['-y', '-o', 'Dpkg::Options="--force-confdef"', '-o', 'Dpkg::Options="--force-confold"'])
 end
 
 params = JSON.parse($stdin.read)
