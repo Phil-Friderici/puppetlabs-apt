@@ -17,7 +17,7 @@ def apt_get_command(action)
   return cmd unless ['upgrade', 'dist-upgrade', 'autoremove'].include?(action)
 
   ENV['DEBIAN_FRONTEND'] = 'noninteractive'
-  cmd.concat(['-y', '-o', 'Dpkg::Options="--force-confdef"', '-o', 'Dpkg::Options="--force-confold"'])
+  cmd.push('-y', '-o', 'Dpkg::Options="--force-confdef"', '-o', 'Dpkg::Options="--force-confold"')
 end
 
 params = JSON.parse($stdin.read)
