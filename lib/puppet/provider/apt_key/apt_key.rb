@@ -38,18 +38,23 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
   end
 
   def self.instance_attributes(line_hash, sub_lines)
+    key_attributes(line_hash).merge(
+      ensure: :present,
+      expired: line_hash[:key_expired] || subkeys_all_expired(sub_lines),
+      expiry: line_hash[:key_expiry]&.strftime('%Y-%m-%d'),
+      created: line_hash[:key_created].strftime('%Y-%m-%d'),
+    )
+  end
+
+  def self.key_attributes(line_hash)
     {
       name: line_hash[:key_fingerprint],
       id: line_hash[:key_long],
       fingerprint: line_hash[:key_fingerprint],
       short: line_hash[:key_short],
       long: line_hash[:key_long],
-      ensure: :present,
-      expired: line_hash[:key_expired] || subkeys_all_expired(sub_lines),
-      expiry: line_hash[:key_expiry]&.strftime('%Y-%m-%d'),
       size: line_hash[:key_size],
       type: line_hash[:key_type],
-      created: line_hash[:key_created].strftime('%Y-%m-%d'),
     }
   end
 
@@ -75,16 +80,22 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
 
   def self.key_line_hash(pub_line, fpr_lines)
     pub_split = pub_line.split(':')
-    fpr_split = fpr_lines.first.split(':')
+    fingerprint = fpr_lines.first.split(':').last
+    key_identity(pub_split, fingerprint).merge(key_expiry(pub_split))
+  end
 
-    fingerprint = fpr_split.last
-    key_type = { '1' => :rsa, '17' => :dsa, '18' => :ecc, '19' => :ecdsa }[pub_split[3]]
+  def self.key_identity(pub_split, fingerprint)
     {
       key_fingerprint: fingerprint,
       key_long: fingerprint[-16..], # last 16 characters of fingerprint
       key_short: fingerprint[-8..], # last 8 characters of fingerprint
       key_size: pub_split[2],
-      key_type: key_type,
+      key_type: { '1' => :rsa, '17' => :dsa, '18' => :ecc, '19' => :ecdsa }[pub_split[3]],
+    }
+  end
+
+  def self.key_expiry(pub_split)
+    {
       key_created: Time.at(pub_split[5].to_i),
       key_expired: pub_split[1] == 'e',
       key_expiry: pub_split[6].empty? ? nil : Time.at(pub_split[6].to_i),
@@ -140,22 +151,18 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
   end
 
   def verify_fingerprint(file)
-    if name.size == 40
-      if File.executable? command(:gpg)
-        extracted_key = execute(["#{command(:gpg)} --no-tty --with-fingerprint --with-colons #{file.path} | awk -F: '/^fpr:/ { print $10 }'"], failonfail: false)
-        extracted_key = extracted_key.chomp
+    return unless name.size == 40
+    return warning('/usr/bin/gpg cannot be found for verification of the id.') unless File.executable? command(:gpg)
 
-        found_match = false
-        extracted_key.each_line do |line|
-          found_match = true if line.chomp == name
-        end
-        unless found_match
-          raise(_('The id in your manifest %{_resource} and the fingerprint from content/source don\'t match. Check for an error in the id and content/source is legitimate.') % { _resource: resource[:name] }) # rubocop:disable Layout/LineLength
-        end
-      else
-        warning('/usr/bin/gpg cannot be found for verification of the id.')
-      end
-    end
+    verify_fingerprint_match(file)
+  end
+
+  def verify_fingerprint_match(file)
+    extracted_key = execute(["#{command(:gpg)} --no-tty --with-fingerprint --with-colons #{file.path} | awk -F: '/^fpr:/ { print $10 }'"], failonfail: false)
+    found_match = extracted_key.each_line.any? { |line| line.chomp == name }
+    return if found_match
+
+    raise(_('The id in your manifest %{_resource} and the fingerprint from content/source don\'t match. Check for an error in the id and content/source is legitimate.') % { _resource: resource[:name] }) # rubocop:disable Layout/LineLength
   end
 
   def exists?
@@ -169,24 +176,33 @@ Puppet::Type.type(:apt_key).provide(:apt_key) do
   end
 
   def create_command
-    command = []
-    if resource[:source].nil? && resource[:content].nil?
-      # Breaking up the command like this is needed because it blows up
-      # if --recv-keys isn't the last argument.
-      command.push('adv', '--no-tty', '--keyserver', resource[:server])
-      command.push('--keyserver-options', resource[:options]) unless resource[:options].nil?
-      command.push('--recv-keys', resource[:id])
-    elsif resource[:content]
-      key_file = tempfile(resource[:content])
-      command.push('add', key_file.path)
-    elsif resource[:source]
-      key_file = source_to_file(resource[:source])
-      command.push('add', key_file.path)
-    # In case we really screwed up, better safe than sorry.
-    else
-      raise(_('an unexpected condition occurred while trying to add the key: %{_resource}') % { _resource: resource[:id] })
-    end
-    command
+    return keyserver_command if resource[:source].nil? && resource[:content].nil?
+    return create_from_content if resource[:content]
+    return create_from_source if resource[:source]
+
+    raise_unexpected_source
+  end
+
+  def create_from_content
+    key_file_command(tempfile(resource[:content]))
+  end
+
+  def create_from_source
+    key_file_command(source_to_file(resource[:source]))
+  end
+
+  def keyserver_command
+    command = ['adv', '--no-tty', '--keyserver', resource[:server]]
+    command.push('--keyserver-options', resource[:options]) unless resource[:options].nil?
+    command.push('--recv-keys', resource[:id])
+  end
+
+  def key_file_command(key_file)
+    ['add', key_file.path]
+  end
+
+  def raise_unexpected_source
+    raise(_('an unexpected condition occurred while trying to add the key: %{_resource}') % { _resource: resource[:id] })
   end
 
   def destroy
