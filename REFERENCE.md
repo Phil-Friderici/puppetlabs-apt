@@ -368,7 +368,7 @@ Data type: `Stdlib::Absolutepath`
 
 Specifies the path of the sources_list.d file to use.
 
-Default value: `"${root}/sources.list.d"`
+Default value: `$apt::params::sources_list_d`
 
 ##### <a name="-apt--conf_d"></a>`conf_d`
 
@@ -376,7 +376,7 @@ Data type: `Stdlib::Absolutepath`
 
 Specifies the path of the conf.d file to use.
 
-Default value: `"${root}/apt.conf.d"`
+Default value: `$apt::params::conf_d`
 
 ##### <a name="-apt--preferences"></a>`preferences`
 
@@ -392,7 +392,7 @@ Data type: `Stdlib::Absolutepath`
 
 Specifies the path of the preferences.d file to use.
 
-Default value: `"${root}/preferences.d"`
+Default value: `$apt::params::preferences_d`
 
 ##### <a name="-apt--config_files"></a>`config_files`
 
@@ -400,28 +400,7 @@ Data type: `Hash`
 
 A hash made up of the various configuration files used by Apt.
 
-Default value:
-
-```puppet
-{
-    'conf'   => {
-      'path' => $conf_d,
-      'ext'  => '',
-    },
-    'pref'   => {
-      'path' => $preferences_d,
-      'ext'  => '.pref',
-    },
-    'list'   => {
-      'path' => $sources_list_d,
-      'ext'  => '.list',
-    },
-    'sources' => {
-      'path' => $sources_list_d,
-      'ext'  => '.sources',
-    },
-  }
-```
+Default value: `$apt::params::config_files`
 
 ##### <a name="-apt--sources_list_force"></a>`sources_list_force`
 
@@ -1496,4 +1475,3 @@ Allows you to perform apt-get functions
 Data type: `Enum[update, upgrade, dist-upgrade, autoremove]`
 
 Action to perform with apt-get
-

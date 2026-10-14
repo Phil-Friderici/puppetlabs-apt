@@ -128,19 +128,19 @@
 #   Specifies the path of the sources_list file to use.
 #
 # @param sources_list_d
-#   Specifies the path of the sources_list.d file to use.
+#   Specifies the path of the sources_list.d file to use. Defaults to `apt::params::sources_list_d`.
 #
 # @param conf_d
-#   Specifies the path of the conf.d file to use.
+#   Specifies the path of the conf.d file to use. Defaults to `apt::params::conf_d`.
 #
 # @param preferences
 #   Specifies the path of the preferences file to use.
 #
 # @param preferences_d
-#   Specifies the path of the preferences.d file to use.
+#   Specifies the path of the preferences.d file to use. Defaults to `apt::params::preferences_d`.
 #
 # @param config_files
-#   A hash made up of the various configuration files used by Apt.
+#   A hash made up of the various configuration files used by Apt. Defaults to `apt::params::config_files`.
 #
 # @param sources_list_force
 #   Specifies whether to perform force purge or delete.
@@ -207,30 +207,13 @@ class apt (
   String[1] $auth_conf_owner = '_apt',
   Stdlib::Absolutepath $root = '/etc/apt',
   Stdlib::Absolutepath $sources_list = "${root}/sources.list",
-  Stdlib::Absolutepath $sources_list_d = "${root}/sources.list.d",
-  Stdlib::Absolutepath $conf_d = "${root}/apt.conf.d",
+  Stdlib::Absolutepath $sources_list_d = $apt::params::sources_list_d,
+  Stdlib::Absolutepath $conf_d = $apt::params::conf_d,
   Stdlib::Absolutepath $preferences = "${root}/preferences",
-  Stdlib::Absolutepath $preferences_d = "${root}/preferences.d",
+  Stdlib::Absolutepath $preferences_d = $apt::params::preferences_d,
   Stdlib::Absolutepath $apt_conf_d = "${root}/apt.conf.d",
   Stdlib::Absolutepath $auth_conf_d = "${root}/auth.conf.d",
-  Hash $config_files = {
-    'conf'   => {
-      'path' => $conf_d,
-      'ext'  => '',
-    },
-    'pref'   => {
-      'path' => $preferences_d,
-      'ext'  => '.pref',
-    },
-    'list'   => {
-      'path' => $sources_list_d,
-      'ext'  => '.list',
-    },
-    'sources' => {
-      'path' => $sources_list_d,
-      'ext'  => '.sources',
-    },
-  },
+  Hash $config_files = $apt::params::config_files,
   Boolean $sources_list_force = false,
   Hash $source_key_defaults = {
     'server'  => $keyserver,
@@ -238,7 +221,7 @@ class apt (
     'content' => undef,
     'source'  => undef,
   },
-) {
+) inherits apt::params {
   if $facts['os']['family'] != 'Debian' {
     fail('This module only works on Debian or derivatives like Ubuntu')
   }

@@ -24,6 +24,46 @@ describe 'apt::setting' do
 
   let(:default_params) { { content: 'di' } }
 
+  context 'without the apt class' do
+    let(:pre_condition) { '' }
+    let(:params) { { content: 'x', notify_update: false, priority: 50 } }
+
+    {
+      'conf-foo' => '/etc/apt/apt.conf.d/50foo',
+      'pref-foo' => '/etc/apt/preferences.d/foo.pref',
+      'list-foo' => '/etc/apt/sources.list.d/foo.list',
+      'sources-foo' => '/etc/apt/sources.list.d/foo.sources',
+    }.each do |setting_title, path|
+      context "with title=#{setting_title}" do
+        let(:title) { setting_title }
+        let(:params) { super().merge(priority: setting_title.start_with?('conf-') ? 50 : 100) }
+
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.to contain_file(path).with_content('x').without_notify }
+        it { is_expected.not_to contain_class('apt') }
+        it { is_expected.not_to contain_class('apt::update') }
+      end
+    end
+
+    context 'with an invalid prefix' do
+      let(:title) { 'bogus-foo' }
+
+      it { is_expected.to compile.and_raise_error(%r{must start with either}) }
+    end
+
+    context 'without content or source' do
+      let(:params) { { ensure: 'file', notify_update: false } }
+
+      it { is_expected.to compile.and_raise_error(%r{needs either of content or source}) }
+    end
+
+    context 'with both content and source' do
+      let(:params) { super().merge(source: 'puppet:///modules/apt/foo') }
+
+      it { is_expected.to compile.and_raise_error(%r{cannot have both content and source}) }
+    end
+  end
+
   describe 'when using the defaults' do
     context 'without source or content' do
       it do
