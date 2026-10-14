@@ -91,7 +91,7 @@ define apt::ppa (
     unless $sources_list_d_filename in $facts['apt_sources'] {
       $script_content = epp('apt/add-apt-repository.sh.epp', {
           command                 => ['/usr/bin/add-apt-repository', shell_join($options), $name],
-          sources_list_d_path     => $apt::sources_list_d,
+          sources_list_d_path     => $apt::params::sources_list_d,
           sources_list_d_filename => $sources_list_d_filename,
         }
       )
@@ -109,11 +109,11 @@ define apt::ppa (
         logoutput   => 'on_failure',
         notify      => Class['apt::update'],
         require     => $_require,
-        before      => File["${apt::sources_list_d}/${sources_list_d_filename}"],
+        before      => File["${apt::params::sources_list_d}/${sources_list_d_filename}"],
       }
     }
 
-    file { "${apt::sources_list_d}/${sources_list_d_filename}": }
+    file { "${apt::params::sources_list_d}/${sources_list_d_filename}": }
   }
   else {
     tidy { "remove-apt-repository-script-${name}":
@@ -121,7 +121,7 @@ define apt::ppa (
     }
 
     tidy { "remove-apt-repository-${name}":
-      path   => "${apt::sources_list_d}/${sources_list_d_filename}",
+      path   => "${apt::params::sources_list_d}/${sources_list_d_filename}",
       notify => Class['apt::update'],
     }
   }

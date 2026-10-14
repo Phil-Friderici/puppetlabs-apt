@@ -154,5 +154,11 @@ describe 'apt::pin', type: :define do
         expect(subject).to raise_error(Puppet::Error, %r{parameters release, origin, and version are mutually exclusive})
       end
     end
+
+    context 'without the apt class' do
+      let(:pre_condition) { 'include apt::params' }
+
+      it { is_expected.to contain_file('/etc/apt/preferences.d/my_pin.pref') }
+    end
   end
 end

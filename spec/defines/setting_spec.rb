@@ -74,6 +74,13 @@ describe 'apt::setting' do
     end
   end
 
+  context 'without the apt class' do
+    let(:pre_condition) { 'include apt::params' }
+    let(:params) { { content: 'di', notify_update: false } }
+
+    it { is_expected.to contain_file('/etc/apt/apt.conf.d/50teddybear').with(content: 'di') }
+  end
+
   describe 'settings requiring settings, MODULES-769' do
     let(:pre_condition) do
       'class { "apt": }

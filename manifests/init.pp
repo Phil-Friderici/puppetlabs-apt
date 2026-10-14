@@ -207,10 +207,10 @@ class apt (
   String[1] $auth_conf_owner = '_apt',
   Stdlib::Absolutepath $root = '/etc/apt',
   Stdlib::Absolutepath $sources_list = "${root}/sources.list",
-  Stdlib::Absolutepath $sources_list_d = "${root}/sources.list.d",
-  Stdlib::Absolutepath $conf_d = "${root}/apt.conf.d",
+  Stdlib::Absolutepath $sources_list_d = $apt::params::sources_list_d,
+  Stdlib::Absolutepath $conf_d = $apt::params::conf_d,
   Stdlib::Absolutepath $preferences = "${root}/preferences",
-  Stdlib::Absolutepath $preferences_d = "${root}/preferences.d",
+  Stdlib::Absolutepath $preferences_d = $apt::params::preferences_d,
   Stdlib::Absolutepath $apt_conf_d = "${root}/apt.conf.d",
   Stdlib::Absolutepath $auth_conf_d = "${root}/auth.conf.d",
   Hash $config_files = {
@@ -238,7 +238,7 @@ class apt (
     'content' => undef,
     'source'  => undef,
   },
-) {
+) inherits apt::params {
   if $facts['os']['family'] != 'Debian' {
     fail('This module only works on Debian or derivatives like Ubuntu')
   }

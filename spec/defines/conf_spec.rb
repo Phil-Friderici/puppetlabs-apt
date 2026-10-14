@@ -87,4 +87,11 @@ describe 'apt::conf', type: :define do
                                                      'group' => 'root')
     }
   end
+
+  context 'without the apt class' do
+    let(:pre_condition) { 'include apt::params' }
+    let(:params) { { content: 'Acquire::Retries "3";', notify_update: false } }
+
+    it { is_expected.to contain_file('/etc/apt/apt.conf.d/50norecommends') }
+  end
 end
