@@ -13,6 +13,7 @@
 
 #### Private Classes
 
+* [`apt::params`](#apt--params): Provides default configuration paths for Apt.
 * `apt::update`: Updates the list of available packages using apt-get update.
 
 ### Defined types
@@ -457,6 +458,24 @@ Default value:
     'source'  => undef,
   }
 ```
+
+### <a name="apt--params"></a>`apt::params`
+
+Provides the default configuration paths used by the `apt` class and `apt::setting`.
+The class is included automatically by `apt::setting`; it can be used without declaring the main `apt` class.
+
+The class defines the following defaults:
+
+* `$sources_list_d`: `/etc/apt/sources.list.d`
+* `$conf_d`: `/etc/apt/apt.conf.d`
+* `$preferences_d`: `/etc/apt/preferences.d`
+* `$config_files`: Maps the `conf`, `pref`, `list`, and `sources` prefixes to their directories and extensions. The defaults are:
+  * `conf`: `$conf_d`, no extension
+  * `pref`: `$preferences_d`, `.pref`
+  * `list`: `$sources_list_d`, `.list`
+  * `sources`: `$sources_list_d`, `.sources`
+
+`apt::setting` may be declared without `apt` when `notify_update => false`, since the main class normally declares `apt::update`.
 
 ### <a name="apt--backports"></a>`apt::backports`
 

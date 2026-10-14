@@ -8,6 +8,7 @@
     * [Beginning with apt](#beginning-with-apt)
 1. [Usage - Configuration options and additional functionality](#usage)
     * [Add GPG keys](#add-gpg-keys)
+    * [Use apt::setting without the main apt class](#use-aptsetting-without-the-main-apt-class)
     * [Prioritize backports](#prioritize-backports)
     * [Update the list of packages](#update-the-list-of-packages)
     * [Pin a specific release](#pin-a-specific-release)
@@ -57,7 +58,7 @@ To use the apt module with default parameters, declare the `apt` class.
 include apt
 ```
 
-**Note:** The main `apt` class is required by all other classes, types, and defined types in this module. You must declare it whenever you use the module.
+**Note:** Most classes, types, and defined types in this module require the main `apt` class. You can use `apt::setting` without declaring `apt`; it reads its default paths from `apt::params`. Set `notify_update => false` when `apt::update` is not declared.
 
 <a id="usage"></a>
 
@@ -100,6 +101,25 @@ apt::key { 'puppetlabs':
   options => 'http-proxy="http://proxyuser:proxypass@example.org:3128"',
 }
 ```
+
+<a id="use-aptsetting-without-the-main-apt-class"></a>
+
+### Use `apt::setting` without the main `apt` class
+
+`apt::params` centralizes the default paths used by Apt settings. It defines `$sources_list_d`, `$conf_d`, `$preferences_d`, and `$config_files`, which maps the `conf`, `pref`, `list`, and `sources` prefixes to their directories and file extensions. The `apt` class and `apt::setting` use these defaults.
+
+`apt::setting` automatically includes `apt::params`, so no explicit declaration is needed:
+
+```puppet
+apt::setting { 'conf-retries':
+  content       => 'Acquire::Retries "3";',
+  notify_update => false,
+}
+```
+
+Set `notify_update` to `false` when using the define without the main `apt` class, because `apt::update` is not otherwise declared.
+
+See [the `apt::params` reference](REFERENCE.md#apt--params) for the default values.
 
 <a id="prioritize-backports"></a>
 
