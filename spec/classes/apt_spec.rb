@@ -73,6 +73,15 @@ describe 'apt' do
     }
   end
 
+  context 'with a custom config_files parameter' do
+    let(:params) do
+      { config_files: { 'conf' => { 'path' => '/custom/apt.conf.d', 'ext' => '.conf' } } }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+    it { is_expected.to contain_class('apt').with_config_files(params[:config_files]) }
+  end
+
   context 'with defaults' do
     it {
       expect(subject).to contain_file('sources.list').that_notifies('Class[Apt::Update]').only_with(sources_list)
