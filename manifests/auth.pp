@@ -21,10 +21,10 @@
 #
 
 define apt::auth (
-  String $ensure   = 'present',
-  String $machine  = $name,
-  String $login    = undef,
-  String $password = undef,
+  String           $ensure   = 'present',
+  String           $machine  = $name,
+  Optional[String] $login    = undef,
+  Optional[String] $password = undef,
 ) {
   $content = epp('apt/auth_conf.d.epp',
     machine  => $machine,
