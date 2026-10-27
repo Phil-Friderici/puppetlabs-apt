@@ -6,6 +6,7 @@ def ppa_exec_params(user, repo, distro = 'trusty', environment = [])
   [
     environment: environment,
     command: "/opt/puppetlabs/puppet/cache/add-apt-repository-#{user}-ubuntu-#{repo}-#{distro}.sh",
+    creates: "/etc/apt/sources.list.d/#{user}-ubuntu-#{repo}-#{distro}.list",
     logoutput: 'on_failure',
   ]
 end
