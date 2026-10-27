@@ -2,9 +2,11 @@
 
 require 'spec_helper_acceptance'
 
+# Keep each ordered resource lifecycle and its cleanup in one example.
+# rubocop:disable RSpec/ExampleLength
 describe 'apt resources' do
   # Verify list-format source parameters produce the expected named source entry.
-  it 'writes list-format source options to the named file' do
+  it 'writes list-format source options to the named file', :aggregate_failures do
     pp = <<-MANIFEST
       apt::source { 'acceptance-list':
         location      => 'https://example.invalid/debian',
@@ -21,7 +23,7 @@ describe 'apt resources' do
   end
 
   # Verify deb822 output, enabled state, and ensure-absent cleanup.
-  it 'manages a deb822 source lifecycle' do
+  it 'manages a deb822 source lifecycle', :aggregate_failures do
     present_pp = <<-MANIFEST
       apt::source { 'acceptance-deb822':
         source_format => 'sources',
@@ -49,7 +51,7 @@ describe 'apt resources' do
   end
 
   # Verify pin priorities and removal are reflected in APT preference files.
-  it 'manages pin priority and removal' do
+  it 'manages pin priority and removal', :aggregate_failures do
     present_pp = <<-MANIFEST
       include apt
 
@@ -75,7 +77,7 @@ describe 'apt resources' do
   end
 
   # Verify apt::conf maps priorities and ensure-absent to apt.conf.d files.
-  it 'manages apt configuration files' do
+  it 'manages apt configuration files', :aggregate_failures do
     present_pp = <<-MANIFEST
       include apt
 
@@ -102,7 +104,7 @@ describe 'apt resources' do
   end
 
   # Verify direct apt::setting resources honor file priority and removal.
-  it 'manages direct apt settings' do
+  it 'manages direct apt settings', :aggregate_failures do
     present_pp = <<-MANIFEST
       include apt
 
@@ -130,7 +132,7 @@ describe 'apt resources' do
   end
 
   # Verify auth credentials use restrictive permissions and can be removed.
-  it 'manages authentication configuration securely' do
+  it 'manages authentication configuration securely', :aggregate_failures do
     present_pp = <<-MANIFEST
       include apt
 
@@ -161,7 +163,7 @@ describe 'apt resources' do
   end
 
   # Verify apt-mark hold and unhold actions alter the package selection state.
-  it 'holds and unholds an installed package' do
+  it 'holds and unholds an installed package', :aggregate_failures do
     hold_pp = <<-MANIFEST
       apt::mark { 'bash':
         setting => 'hold',
@@ -179,3 +181,4 @@ describe 'apt resources' do
     expect(run_shell("! apt-mark showhold | grep -Fx 'bash'")).to be_truthy
   end
 end
+# rubocop:enable RSpec/ExampleLength
