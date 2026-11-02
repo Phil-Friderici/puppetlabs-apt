@@ -20,3 +20,6 @@ jobs:
 
       - name: Docker
         run: docker ps
+
+      - name: PDK Version
+        run: docker exec puppet-agent pdk --version
