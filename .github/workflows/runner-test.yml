@@ -1,0 +1,19 @@
+name: Runner Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    runs-on:
+      - self-hosted
+
+    steps:
+      - name: Who am I
+        run: whoami
+
+      - name: Hostname
+        run: hostname
+
+      - name: Docker
+        run: docker ps
