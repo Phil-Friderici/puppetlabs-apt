@@ -23,3 +23,6 @@ jobs:
 
       - name: PDK Version
         run: docker exec puppet-agent pdk --version
+
+      - name: PDK Validate
+        run: docker exec puppet-agent bash -lc "cd /workspace/puppetlabs-apt && pdk validate"
