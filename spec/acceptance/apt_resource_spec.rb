@@ -4,8 +4,9 @@ require 'spec_helper_acceptance'
 
 describe 'apt resources' do
   # Verify list-format source parameters produce the expected named source entry.
-  it 'writes list-format source options to the named file' do
-    pp = <<-MANIFEST
+  context 'when writing list-format source options' do
+    let(:checks) do
+      pp = <<-MANIFEST
       apt::source { 'acceptance-list':
         location      => 'https://example.invalid/debian',
         release       => 'stable',
@@ -14,15 +15,23 @@ describe 'apt resources' do
         allow_unsigned => true,
         notify_update => false,
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(pp) }).to be_truthy
-    expect(run_shell("grep -F 'deb [arch=amd64 trusted=yes] https://example.invalid/debian stable main' /etc/apt/sources.list.d/acceptance-list.list")).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(pp) },
+        run_shell("grep -F 'deb [arch=amd64 trusted=yes] https://example.invalid/debian stable main' /etc/apt/sources.list.d/acceptance-list.list"),
+      ]
+    end
+
+    it 'writes list-format source options to the named file' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify deb822 output, enabled state, and ensure-absent cleanup.
-  it 'manages a deb822 source lifecycle' do
-    present_pp = <<-MANIFEST
+  context 'when managing a deb822 source lifecycle' do
+    let(:checks) do
+      present_pp = <<-MANIFEST
       apt::source { 'acceptance-deb822':
         source_format => 'sources',
         location      => ['https://example.invalid/debian'],
@@ -32,25 +41,33 @@ describe 'apt resources' do
         enabled       => false,
         notify_update => false,
       }
-    MANIFEST
-    absent_pp = <<-MANIFEST
+      MANIFEST
+      absent_pp = <<-MANIFEST
       apt::source { 'acceptance-deb822':
         source_format => 'sources',
         ensure        => absent,
         notify_update => false,
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(present_pp) }).to be_truthy
-    expect(run_shell("grep -F 'Enabled: no' /etc/apt/sources.list.d/acceptance-deb822.sources")).to be_truthy
-    expect(run_shell("grep -F 'Types: deb deb-src' /etc/apt/sources.list.d/acceptance-deb822.sources")).to be_truthy
-    expect(apply_manifest(absent_pp, catch_failures: true)).to be_truthy
-    expect(run_shell('test ! -e /etc/apt/sources.list.d/acceptance-deb822.sources')).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(present_pp) },
+        run_shell("grep -F 'Enabled: no' /etc/apt/sources.list.d/acceptance-deb822.sources"),
+        run_shell("grep -F 'Types: deb deb-src' /etc/apt/sources.list.d/acceptance-deb822.sources"),
+        apply_manifest(absent_pp, catch_failures: true),
+        run_shell('test ! -e /etc/apt/sources.list.d/acceptance-deb822.sources'),
+      ]
+    end
+
+    it 'manages a deb822 source lifecycle' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify pin priorities and removal are reflected in APT preference files.
-  it 'manages pin priority and removal' do
-    present_pp = <<-MANIFEST
+  context 'when managing pin priority and removal' do
+    let(:checks) do
+      present_pp = <<-MANIFEST
       include apt
 
       apt::pin { 'acceptance-priority':
@@ -58,25 +75,33 @@ describe 'apt resources' do
         origin   => 'example.invalid',
         priority => 990,
       }
-    MANIFEST
-    absent_pp = <<-MANIFEST
+      MANIFEST
+      absent_pp = <<-MANIFEST
       include apt
 
       apt::pin { 'acceptance-priority':
         ensure => absent,
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(present_pp) }).to be_truthy
-    expect(run_shell("grep -F 'Package: bash curl' /etc/apt/preferences.d/acceptance-priority.pref")).to be_truthy
-    expect(run_shell("grep -F 'Pin-Priority: 990' /etc/apt/preferences.d/acceptance-priority.pref")).to be_truthy
-    expect(apply_manifest(absent_pp, catch_failures: true)).to be_truthy
-    expect(run_shell('test ! -e /etc/apt/preferences.d/acceptance-priority.pref')).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(present_pp) },
+        run_shell("grep -F 'Package: bash curl' /etc/apt/preferences.d/acceptance-priority.pref"),
+        run_shell("grep -F 'Pin-Priority: 990' /etc/apt/preferences.d/acceptance-priority.pref"),
+        apply_manifest(absent_pp, catch_failures: true),
+        run_shell('test ! -e /etc/apt/preferences.d/acceptance-priority.pref'),
+      ]
+    end
+
+    it 'manages pin priority and removal' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify apt::conf maps priorities and ensure-absent to apt.conf.d files.
-  it 'manages apt configuration files' do
-    present_pp = <<-MANIFEST
+  context 'when managing apt configuration files' do
+    let(:checks) do
+      present_pp = <<-MANIFEST
       include apt
 
       apt::conf { 'acceptance':
@@ -84,8 +109,8 @@ describe 'apt resources' do
         priority      => 42,
         notify_update => false,
       }
-    MANIFEST
-    absent_pp = <<-MANIFEST
+      MANIFEST
+      absent_pp = <<-MANIFEST
       include apt
 
       apt::conf { 'acceptance':
@@ -93,17 +118,25 @@ describe 'apt resources' do
         priority      => 42,
         notify_update => false,
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(present_pp) }).to be_truthy
-    expect(run_shell("grep -F 'Acquire::Retries \"2\";' /etc/apt/apt.conf.d/42acceptance")).to be_truthy
-    expect(apply_manifest(absent_pp, catch_failures: true)).to be_truthy
-    expect(run_shell('test ! -e /etc/apt/apt.conf.d/42acceptance')).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(present_pp) },
+        run_shell("grep -F 'Acquire::Retries \"2\";' /etc/apt/apt.conf.d/42acceptance"),
+        apply_manifest(absent_pp, catch_failures: true),
+        run_shell('test ! -e /etc/apt/apt.conf.d/42acceptance'),
+      ]
+    end
+
+    it 'manages apt configuration files' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify direct apt::setting resources honor file priority and removal.
-  it 'manages direct apt settings' do
-    present_pp = <<-MANIFEST
+  context 'when managing direct apt settings' do
+    let(:checks) do
+      present_pp = <<-MANIFEST
       include apt
 
       apt::setting { 'conf-acceptance-setting':
@@ -112,8 +145,8 @@ describe 'apt resources' do
         content       => 'Acquire::Retries "3";',
         notify_update => false,
       }
-    MANIFEST
-    absent_pp = <<-MANIFEST
+      MANIFEST
+      absent_pp = <<-MANIFEST
       include apt
 
       apt::setting { 'conf-acceptance-setting':
@@ -121,17 +154,25 @@ describe 'apt resources' do
         priority      => 43,
         notify_update => false,
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(present_pp) }).to be_truthy
-    expect(run_shell("grep -F 'Acquire::Retries \"3\";' /etc/apt/apt.conf.d/43acceptance-setting")).to be_truthy
-    expect(apply_manifest(absent_pp, catch_failures: true)).to be_truthy
-    expect(run_shell('test ! -e /etc/apt/apt.conf.d/43acceptance-setting')).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(present_pp) },
+        run_shell("grep -F 'Acquire::Retries \"3\";' /etc/apt/apt.conf.d/43acceptance-setting"),
+        apply_manifest(absent_pp, catch_failures: true),
+        run_shell('test ! -e /etc/apt/apt.conf.d/43acceptance-setting'),
+      ]
+    end
+
+    it 'manages direct apt settings' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify auth credentials use restrictive permissions and can be removed.
-  it 'manages authentication configuration securely' do
-    present_pp = <<-MANIFEST
+  context 'when managing authentication configuration' do
+    let(:checks) do
+      present_pp = <<-MANIFEST
       include apt
 
       apt::auth { 'acceptance-auth':
@@ -139,8 +180,8 @@ describe 'apt resources' do
         login    => 'acceptance-user',
         password => 'acceptance-test-password',
       }
-    MANIFEST
-    absent_pp = <<-MANIFEST
+      MANIFEST
+      absent_pp = <<-MANIFEST
       include apt
 
       apt::auth { 'acceptance-auth':
@@ -149,33 +190,48 @@ describe 'apt resources' do
         login    => 'acceptance-user',
         password => 'acceptance-test-password',
       }
-    MANIFEST
+      MANIFEST
 
-    expect(retry_on_error_matching { idempotent_apply(present_pp) }).to be_truthy
-    expect(run_shell("grep -F 'machine packages.example.invalid' /etc/apt/auth.conf.d/acceptance-auth.conf")).to be_truthy
-    expect(run_shell("grep -Fx 'login acceptance-user' /etc/apt/auth.conf.d/acceptance-auth.conf")).to be_truthy
-    expect(run_shell("grep -Fx 'password acceptance-test-password' /etc/apt/auth.conf.d/acceptance-auth.conf")).to be_truthy
-    expect(run_shell('test "$(stat -c %a /etc/apt/auth.conf.d/acceptance-auth.conf)" = 600')).to be_truthy
-    expect(apply_manifest(absent_pp, catch_failures: true)).to be_truthy
-    expect(run_shell('test ! -e /etc/apt/auth.conf.d/acceptance-auth.conf')).to be_truthy
+      [
+        retry_on_error_matching { idempotent_apply(present_pp) },
+        run_shell("grep -F 'machine packages.example.invalid' /etc/apt/auth.conf.d/acceptance-auth.conf"),
+        run_shell("grep -Fx 'login acceptance-user' /etc/apt/auth.conf.d/acceptance-auth.conf"),
+        run_shell("grep -Fx 'password acceptance-test-password' /etc/apt/auth.conf.d/acceptance-auth.conf"),
+        run_shell('test "$(stat -c %a /etc/apt/auth.conf.d/acceptance-auth.conf)" = 600'),
+        apply_manifest(absent_pp, catch_failures: true),
+        run_shell('test ! -e /etc/apt/auth.conf.d/acceptance-auth.conf'),
+      ]
+    end
+
+    it 'manages authentication configuration securely' do
+      expect(checks).to all(be_truthy)
+    end
   end
 
   # Verify apt-mark hold and unhold actions alter the package selection state.
-  it 'holds and unholds an installed package' do
-    hold_pp = <<-MANIFEST
+  context 'when holding and unholding a package' do
+    let(:checks) do
+      hold_pp = <<-MANIFEST
       apt::mark { 'bash':
         setting => 'hold',
       }
-    MANIFEST
-    unhold_pp = <<-MANIFEST
+      MANIFEST
+      unhold_pp = <<-MANIFEST
       apt::mark { 'bash':
         setting => 'unhold',
       }
-    MANIFEST
+      MANIFEST
 
-    expect(apply_manifest(hold_pp, catch_failures: true)).to be_truthy
-    expect(run_shell("apt-mark showhold | grep -Fx 'bash'")).to be_truthy
-    expect(apply_manifest(unhold_pp, catch_failures: true)).to be_truthy
-    expect(run_shell("! apt-mark showhold | grep -Fx 'bash'")).to be_truthy
+      [
+        apply_manifest(hold_pp, catch_failures: true),
+        run_shell("apt-mark showhold | grep -Fx 'bash'"),
+        apply_manifest(unhold_pp, catch_failures: true),
+        run_shell("! apt-mark showhold | grep -Fx 'bash'"),
+      ]
+    end
+
+    it 'holds and unholds an installed package' do
+      expect(checks).to all(be_truthy)
+    end
   end
 end
