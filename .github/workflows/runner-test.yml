@@ -2,9 +2,7 @@ name: Runner Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - runner-test
+  pull_request:
 
 jobs:
   test-runner:
@@ -12,21 +10,19 @@ jobs:
       - self-hosted
 
     steps:
-      - name: Who am I
-        run: whoami
-
-      - name: Hostname
-        run: hostname
-
-      - name: Docker
-        run: docker ps
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: PDK Version
         run: docker exec puppet-agent pdk --version
 
       - name: PDK Validate
         continue-on-error: true
-        run: docker exec puppet-agent bash -lc "cd /workspace/puppetlabs-apt && pdk validate"
+        run: |
+          docker exec puppet-agent bash -lc \
+          "cd /workspace/puppetlabs-apt && pdk validate"
 
       - name: PDK Unit Tests
-        run: docker exec puppet-agent bash -lc "cd /workspace/puppetlabs-apt && pdk test unit"
+        run: |
+          docker exec puppet-agent bash -lc \
+          "cd /workspace/puppetlabs-apt && pdk test unit"
