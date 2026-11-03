@@ -32,9 +32,9 @@ jobs:
         continue-on-error: true
         run: |
           docker exec puppet-agent bash -lc \
-          "cd /workspace/puppetlabs-apt && pdk validate"
+          "cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt && pdk validate"
 
       - name: PDK Unit Tests
         run: |
           docker exec puppet-agent bash -lc \
-          "cd /workspace/puppetlabs-apt && pdk test unit"
+          "cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt && pdk test unit"
