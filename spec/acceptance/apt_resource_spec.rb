@@ -2,6 +2,8 @@
 
 require 'spec_helper_acceptance'
 
+# Keep each complete resource lifecycle in one example, including its cleanup.
+# rubocop:disable RSpec/ExampleLength, RSpec/MultipleExpectations
 describe 'apt resources' do
   # Verify list-format source parameters produce the expected named source entry.
   it 'writes list-format source options to the named file' do
@@ -179,3 +181,4 @@ describe 'apt resources' do
     expect(run_shell("! apt-mark showhold | grep -Fx 'bash'")).to be_truthy
   end
 end
+# rubocop:enable RSpec/ExampleLength, RSpec/MultipleExpectations
