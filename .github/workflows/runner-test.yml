@@ -13,6 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show workspace
+        run: |
+          pwd
+          echo "$GITHUB_WORKSPACE"
+          ls -la
+
       - name: PDK Version
         run: docker exec puppet-agent pdk --version
 
