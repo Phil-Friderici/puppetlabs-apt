@@ -8,21 +8,39 @@ jobs:
   test-runner:
     runs-on:
       - self-hosted
+      - puppet
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show workspace
+        run: |
+          pwd
+          echo "$GITHUB_WORKSPACE"
+          ls -la
+
       - name: PDK Version
-        run: docker exec puppet-agent pdk --version
+        run: |
+          docker exec \
+            --user runner \
+            puppet-agent \
+            pdk --version
 
       - name: PDK Validate
-        continue-on-error: true
         run: |
-          docker exec puppet-agent bash -lc \
-          "cd /workspace/puppetlabs-apt && pdk validate"
+          docker exec \
+            --user runner \
+            puppet-agent \
+            bash -lc '
+              cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt
+              pdk validate --debug || true
+            '
 
       - name: PDK Unit Tests
         run: |
-          docker exec puppet-agent bash -lc \
-          "cd /workspace/puppetlabs-apt && pdk test unit"
+          docker exec \
+            --user runner \
+            puppet-agent \
+            bash -lc \
+            "cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt && pdk test unit"

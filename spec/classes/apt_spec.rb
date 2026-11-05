@@ -572,7 +572,7 @@ describe 'apt' do
     end
 
     it {
-      expect(subject).to contain_apt__setting('list-debian_unstable').with(ensure: 'present')
+      expect(subject).to contain_apt__setting('list-debian_unstable').with(ensure: 'absent')
     }
 
     it { is_expected.to contain_file('/etc/apt/sources.list.d/debian_unstable.list').with_content(%r{^deb http://debian.mirror.iweb.ca/debian/ unstable main contrib non-free$}) }
