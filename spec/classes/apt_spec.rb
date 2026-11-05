@@ -579,7 +579,7 @@ describe 'apt' do
     it { is_expected.to contain_file('/etc/apt/sources.list.d/debian_unstable.list').with_content(%r{^deb-src http://debian.mirror.iweb.ca/debian/ unstable main contrib non-free$}) }
 
     it {
-      expect(subject).to contain_apt__setting('list-puppetlabs').with(ensure: 'present')
+      expect(subject).to contain_apt__setting('list-puppetlabs').with(ensure: 'absent')
     }
 
     it { is_expected.to contain_file('/etc/apt/sources.list.d/puppetlabs.list').with_content(%r{^deb http://apt.puppetlabs.com bionic main$}) }
