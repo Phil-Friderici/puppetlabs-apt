@@ -30,10 +30,12 @@ jobs:
         run: docker exec puppet-agent pdk --version
 
       - name: PDK Validate
-        continue-on-error: true
         run: |
-          docker exec puppet-agent bash -lc \
-          "cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt && pdk validate"
+          docker exec puppet-agent bash -lc '
+            set -x
+            cd /runner/actions-runner/_work/puppetlabs-apt/puppetlabs-apt
+            pdk validate --debug
+          '
 
       - name: PDK Unit Tests
         run: |
