@@ -10,9 +10,11 @@ Puppet::Type.type(:apt_key).provide(:apt_key_missing) do
   confine    true: Puppet::Util.which('apt-key').nil?
   defaultfor 'os.family': :debian
 
+  # rubocop:disable Lint/ConstantDefinitionInBlock
   ERROR_MESSAGE = 'The apt-key command is not available on this system (it was removed in apt 3, e.g. Debian 13 and Ubuntu 26.04), ' \
                   'so apt_key and apt::key cannot be used. Use apt::keyring, or the `key` parameter of apt::source with a `name` and a ' \
                   '`source` or `content` (key => { name => \'example.gpg\', source => \'https://example.com/key.gpg\' }), instead.'
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   def exists?
     raise(Puppet::Error, ERROR_MESSAGE)
