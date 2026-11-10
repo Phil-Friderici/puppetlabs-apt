@@ -11,13 +11,13 @@ describe 'apt::setting' do
         name: 'Debian',
         release: {
           major: '9',
-          full: '9.0'
+          full: '9.0',
         },
         distro: {
           codename: 'stretch',
-          id: 'Debian'
-        }
-      }
+          id: 'Debian',
+        },
+      },
     }
   end
   let(:title) { 'conf-teddybear' }
@@ -87,13 +87,13 @@ describe 'apt::setting' do
           name: 'Debian',
           release: {
             major: '9',
-            full: '9.0'
+            full: '9.0',
           },
           distro: {
             codename: 'stretch',
-            id: 'Debian'
-          }
-        }
+            id: 'Debian',
+          },
+        },
       }
     end
     let(:title) { 'conf-teddybear' }
@@ -150,6 +150,7 @@ describe 'apt::setting' do
       expect(subject).to contain_file('/etc/apt/apt.conf.d/50teddybear').that_notifies('Class[Apt::Update]').with(ensure: 'absent')
     }
   end
+
   describe 'with ensure=absent and without default params' do
     let(:params) { { ensure: 'absent' } }
 

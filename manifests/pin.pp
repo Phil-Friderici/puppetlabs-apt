@@ -112,19 +112,19 @@ define apt::pin (
   $headertmp = epp('apt/_header.epp')
 
   $pinpreftmp = epp('apt/pin.pref.epp', {
-      'name'            => $name,
-      'pin_release'     => $pin_release,
-      'release'         => $release,
-      'codename'        => $codename,
-      'release_version' => $release_version,
-      'component'       => $component,
-      'originator'      => $originator,
-      'label'           => $label,
-      'version'         => $version,
-      'origin'          => $origin,
-      'explanation'     => $_explanation,
-      'packages_string' => $packages_string,
-      'priority'        => $priority,
+    'name'            => $name,
+    'pin_release'     => $pin_release,
+    'release'         => $release,
+    'codename'        => $codename,
+    'release_version' => $release_version,
+    'component'       => $component,
+    'originator'      => $originator,
+    'label'           => $label,
+    'version'         => $version,
+    'origin'          => $origin,
+    'explanation'     => $_explanation,
+    'packages_string' => $packages_string,
+    'priority'        => $priority,
   })
 
   apt::setting { "pref-${file_name}":
