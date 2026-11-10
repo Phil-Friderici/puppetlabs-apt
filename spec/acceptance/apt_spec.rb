@@ -39,7 +39,7 @@ describe 'apt class' do
   end
 
   context 'with all the things' do
-    it 'works with no errors' do
+    it 'works with no errors' do # rubocop:disable RSpec/ExampleLength
       if apt_key_available?
         # Apply the manifest (Retry if timeout error is received from key pool)
         retry_on_error_matching do
