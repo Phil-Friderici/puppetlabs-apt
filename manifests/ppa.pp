@@ -106,6 +106,7 @@ define apt::ppa (
       exec { "add-apt-repository-${name}":
         environment => $_proxy_env,
         command     => $script_path,
+        creates     => "${apt::sources_list_d}/${sources_list_d_filename}",
         logoutput   => 'on_failure',
         notify      => Class['apt::update'],
         require     => $_require,

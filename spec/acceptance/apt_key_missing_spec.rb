@@ -14,10 +14,6 @@ describe 'apt_key without apt-key' do
     skip 'apt-key is available on this platform' if apt_key_available?
   end
 
-  after(:all) do
-    run_shell('rm -f /etc/apt/sources.list.d/missing_key_test.list /etc/apt/keyrings/missing_key_test.gpg', expect_failures: true)
-  end
-
   it 'has no apt-key command' do
     run_shell('command -v apt-key', expect_failures: true) do |r|
       expect(r.exit_code).not_to eq(0)
@@ -91,5 +87,9 @@ describe 'apt_key without apt-key' do
     run_shell('cat /etc/apt/sources.list.d/missing_key_test.list') do |r|
       expect(r.stdout).to match(%r{signed-by=/etc/apt/keyrings/missing_key_test\.gpg})
     end
+  end
+
+  after(:all) do
+    run_shell('rm -f /etc/apt/sources.list.d/missing_key_test.list /etc/apt/keyrings/missing_key_test.gpg', expect_failures: true)
   end
 end
