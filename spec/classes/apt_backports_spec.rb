@@ -37,6 +37,13 @@ describe 'apt::backports', type: :class do
       end
 
       it { is_expected.to contain_apt__source('backports').with(source_params) }
+
+      context 'when the apt class defaults to deb822' do
+        let(:pre_condition) { 'class { "apt": source_format => "sources" }' }
+
+        it { is_expected.to contain_apt__setting('list-backports').with_ensure('present') }
+        it { is_expected.not_to contain_apt__setting('sources-backports') }
+      end
     end
 
     context "with everything set on ubuntu #{release_major}" do
