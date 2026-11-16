@@ -222,7 +222,7 @@ describe 'apt::backports', type: :class do
           repos: 'main contrib non-free non-free-firmware',
           release: 'bookworm-backports',
           pin: {
-            'priority' => 200,
+            'priority' => 100,
             'codename' => 'bookworm-backports'
           },
           keyring: '/usr/share/keyrings/debian-archive-keyring.gpg',
