@@ -90,6 +90,8 @@
 #
 # @param allow_unsigned
 #   Specifies whether to authenticate packages from this release, even if the Release file is not signed or the signature can't be checked.
+#   Setting to `true` marks the source as trusted (`trusted=yes` for traditional sources or `Trusted: yes` for Deb822).
+#   Setting to `false` or leaving it unset omits the trust field; it does not emit `Trusted: no`, so Apt's default authentication behavior applies.
 #
 # @param allow_insecure
 #   Specifies whether to allow downloads from insecure repositories.

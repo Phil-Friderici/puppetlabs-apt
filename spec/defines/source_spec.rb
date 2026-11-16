@@ -182,6 +182,19 @@ describe 'apt::source' do
     }
   end
 
+  context 'with allow_unsigned false' do
+    let :params do
+      {
+        location: 'hello.there',
+        allow_unsigned: false
+      }
+    end
+
+    it {
+      expect(subject).to contain_apt__setting('list-my_source').with(ensure: 'present').with_content(%r{# my_source\ndeb hello.there stretch main\n})
+    }
+  end
+
   context 'with check_valid_until false' do
     let :params do
       {
@@ -580,18 +593,20 @@ describe 'apt::source' do
       it { is_expected.to contain_apt__setting("sources-#{title}").with_content(%r{Trusted: yes}) }
     end
 
-    context 'deb822 source with allow_unsigned false' do
+    context 'with allow_unsigned false for deb822 sources' do
       let :params do
         super().merge(
           {
             location: ['http://debian.mirror.iweb.ca/debian/'],
             repos: ['main'],
             allow_unsigned: false,
+            keyring: '/foo',
           },
         )
       end
 
       it { is_expected.to contain_apt__setting("sources-#{title}").without_content(%r{Trusted:}) }
+      it { is_expected.to contain_apt__setting("sources-#{title}").with_content(%r{Signed-By: /foo}) }
     end
 
     context '.list backwards compatibility' do
