@@ -35,7 +35,8 @@
 #
 # @param pin
 #   Specifies a pin priority for the backports. Valid options: a number or string to be passed to the `id` parameter of the `apt::pin` defined
-#   type, or a hash of `parameter => value` pairs to be passed to `apt::pin`'s corresponding parameters.
+#   type, or a hash of `parameter => value` pairs to be passed to `apt::pin`'s corresponding parameters. Defaults to 100 on Debian and 200
+#   elsewhere.
 #
 # @param include
 #   Specifies whether to include 'deb' or 'src', or both.
@@ -46,7 +47,10 @@ class apt::backports (
   Optional[String[1]] $repos = undef,
   Optional[Variant[String[1], Hash]] $key = undef,
   Stdlib::AbsolutePath $keyring = "/usr/share/keyrings/${facts['os']['name'].downcase}-archive-keyring.gpg",
-  Variant[Integer, String[1], Hash] $pin = 200,
+  Variant[Integer, String[1], Hash] $pin = $facts['os']['name'] ? {
+    'Debian' => 100,
+    default  => 200,
+  },
   Hash $include = {},
 ) {
   include apt

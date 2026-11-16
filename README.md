@@ -111,7 +111,7 @@ class { 'apt::backports':
 }
 ```
 
-By default, the `apt::backports` class drops a pin file for backports, pinning it to a priority of 200. This is lower than the normal default of 500, so packages with `ensure => latest` don't get upgraded from backports without your explicit permission.
+By default, the `apt::backports` class pins Debian backports to priority 100, matching Debian's Backports metadata. On Ubuntu and other supported systems, the default remains 200. Both priorities are lower than the normal priority of 500, so packages from the stable release remain preferred when available.
 
 If you raise the priority through the `pin` parameter to 500, normal policy goes into effect and Apt installs or upgrades to the newest version. This means that if a package is available from backports, it and its dependencies are pulled in from backports unless you explicitly set the `ensure` attribute of the `package` resource to `installed`/`present` or a specific version.
 
